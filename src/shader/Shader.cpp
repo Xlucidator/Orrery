@@ -96,3 +96,18 @@ void Shader::checkShaderErrors(GLuint target, int type) {
 		}
 	}
 }
+
+void Shader::setFloat(const std::string& name, float value) {
+	GLint location = glGetUniformLocation(_program, name.c_str());
+	GL_CALL(glUniform1f(location, value));
+}
+
+void Shader::setVec3f(const std::string& name, float x, float y, float z) {
+	GLint location = glGetUniformLocation(_program, name.c_str());
+	GL_CALL(glUniform3f(location, x, y, z));
+}
+
+void Shader::setVec3f(const std::string& name, const float* values) {
+	GLint location = glGetUniformLocation(_program, name.c_str());
+	GL_CALL(glUniform3fv(location, 1, &value)); // values contain 1 vec3
+}

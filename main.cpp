@@ -120,14 +120,17 @@ void render() {
     /* Clear canvas */
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
 
-    
+    /* Set User Shader */
     shader->begin();    // Bind User Shader
+	shader->setFloat("time", glfwGetTime());
+
+    /* Set VAO */
 	GL_CALL(glBindVertexArray(vao)); // Bind Current VAO
     
     /* Draw */
     GL_CALL(glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0));
-    //GL_CALL(glDrawArrays(GL_TRIANGLE_FAN, 0, 6));
-
+    
+    /* End Clear */
 	GL_CALL(glBindVertexArray(0));  // De-Bind Current VAO
 	shader->end();      // De-Bind User Shader
 }

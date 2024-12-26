@@ -2,6 +2,7 @@
 #define SHADER_H
 
 #include "common.h"
+#include <string>
 //#include <iostream>
 //#include <glad/glad.h>
 //#include <GLFW/glfw3.h>
@@ -13,6 +14,10 @@ public:
 
 	void begin(); // begin to use shader
 	void end();   // end to use shader
+
+	void setFloat(const std::string& name, float value);
+	void setVec3f(const std::string& name, float x, float y, float z);
+	void setVec3f(const std::string& name, const float* value);
 
 private:
 	GLuint _program = 0;
