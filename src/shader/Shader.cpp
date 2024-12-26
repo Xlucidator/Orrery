@@ -97,17 +97,27 @@ void Shader::checkShaderErrors(GLuint target, int type) {
 	}
 }
 
-void Shader::setFloat(const std::string& name, float value) {
+void Shader::setFloat(const std::string& name, float value) const {
 	GLint location = glGetUniformLocation(_program, name.c_str());
 	GL_CALL(glUniform1f(location, value));
 }
 
-void Shader::setVec3f(const std::string& name, float x, float y, float z) {
+void Shader::setVec3f(const std::string& name, float x, float y, float z) const {
 	GLint location = glGetUniformLocation(_program, name.c_str());
 	GL_CALL(glUniform3f(location, x, y, z));
 }
 
-void Shader::setVec3f(const std::string& name, const float* values) {
+void Shader::setVec3f(const std::string& name, const float* values) const {
 	GLint location = glGetUniformLocation(_program, name.c_str());
-	GL_CALL(glUniform3fv(location, 1, &value)); // values contain 1 vec3
+	GL_CALL(glUniform3fv(location, 1, values)); // values contain 1 vec3
+}
+
+void Shader::setInt(const std::string& name, int value) const {
+	GLint location = glGetUniformLocation(_program, name.c_str());
+	GL_CALL(glUniform1i(location, value));
+}
+
+void Shader::setMat4f(const std::string& name, const float* value) const {
+	GLint location = glGetUniformLocation(_program, name.c_str());
+	GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, value));
 }

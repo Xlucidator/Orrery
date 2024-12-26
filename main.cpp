@@ -116,6 +116,8 @@ void prepareShader() {
 	shader = new Shader("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
 }
 
+
+glm::mat4 model, view, projection;
 void render() {
     /* Clear canvas */
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
@@ -123,6 +125,18 @@ void render() {
     /* Set User Shader */
     shader->begin();    // Bind User Shader
 	shader->setFloat("time", glfwGetTime());
+    // tmp
+    //glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+    //glm::mat4 view = glm::mat4(1.0f);
+    //glm::mat4 projection = glm::mat4(1.0f);
+    //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+    //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    ////projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    //projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 10.0f);
+
+	shader->setMat4f("model", glm::value_ptr(model));
+	shader->setMat4f("view", glm::value_ptr(view));
+	shader->setMat4f("projection", glm::value_ptr(projection));
 
     /* Set VAO */
 	GL_CALL(glBindVertexArray(vao)); // Bind Current VAO
@@ -149,6 +163,10 @@ int main() {
 
     prepareInterleavedBuffer();
     prepareShader();
+
+    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));  // move reverse
+    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
     // window loop
     while (APP->update()) {

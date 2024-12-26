@@ -15,9 +15,11 @@ public:
 	void begin(); // begin to use shader
 	void end();   // end to use shader
 
-	void setFloat(const std::string& name, float value);
-	void setVec3f(const std::string& name, float x, float y, float z);
-	void setVec3f(const std::string& name, const float* value);
+	void setFloat(const std::string& name, float value) const;
+	void setVec3f(const std::string& name, float x, float y, float z) const;
+	void setVec3f(const std::string& name, const float* value) const;
+	void setInt(const std::string& name, int value) const;  // for texture
+	void setMat4f(const std::string& name, const float* value) const;
 
 private:
 	GLuint _program = 0;

@@ -5,8 +5,12 @@ out vec3 color;
 
 uniform float time;
 
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
 void main() {
-    vec3 offset = vec3(sin(time), 0.0, 0.0);
-    gl_Position = vec4(aPos + offset, 1.0);
+    vec3 offset = vec3(sin(time)/2.0, 0.0, 0.0);
+    gl_Position = projection * view * model * vec4(aPos + offset, 1.0);
     color = (sin(time) + 1.0)/2.0 * aColor;
 }
