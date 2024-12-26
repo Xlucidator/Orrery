@@ -1,12 +1,12 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <iostream>
+
 #include <assert.h>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "common.h"
 
+/* Error Check */
 #ifdef DEBUG
 
 #define GL_CALL(glfunc) do { \
@@ -20,5 +20,14 @@
 #endif
 
 void check_error();
+
+
+/* Define */
+#define setVAO(vao, operation)  do { \
+		GL_CALL(glBindVertexArray(vao)); \
+			operation  \
+		GL_CALL(glBindVertexArray(0));   \
+	} while (false)
+
 
 #endif // !UTILS_H

@@ -1,9 +1,7 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include <iostream>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "common.h"
 
 #define APP (Application::getInstance())
 

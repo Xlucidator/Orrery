@@ -24,13 +24,13 @@ add_executable(EscapeDungeon
 )
 target_link_libraries(EscapeDungeon glfw3.lib)
 
+# assets
+file(GLOB ASSETS "./assets")
+file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
+
+
 # libs
 # file(GLOB LIBS "./libs/*.cpp")
 # add_library(EscapeDungeon STATIC ${LIBS})
 # target_include_directories(libs PUBLIC "./libs")
 # target_link_libraries(EscapeDungeon PRIVATE libs)
-
-# assets
-file(GLOB ASSETS "./assets")
-file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
-
