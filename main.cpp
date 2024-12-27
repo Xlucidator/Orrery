@@ -1,12 +1,27 @@
 
+#include <string>
+
 #include "common.h"
 #include "utils.h"
 
 #include "application/Application.h"
 #include "shader/Shader.h"
+#include "camera/Camera.h"
 
+
+/* Application settings */
 GLuint vao = 0;
 Shader* shader = nullptr;
+float viewport_width = 800.0f, viewport_height = 600.0f;
+
+/* Time */
+float last_frame = 0.0f;
+float delta_time = 0.0f;
+
+/* Camera */
+Camera* camera = nullptr;
+bool first_mouse = true;
+float last_x = viewport_width / 2.0f, last_y = viewport_height / 2.0f;
 
 void onResize(int width, int height) {
     std::cout << "onResize" << std::endl;
@@ -14,11 +29,51 @@ void onResize(int width, int height) {
 }
 
 void onKeyChange(int key, int scancode, int action, int mods) {
-    std::cout << (action == GLFW_RELEASE ? "release key: " :
-        action == GLFW_PRESS ? "press a key: " :
-        action == 2 ? "pressing key: " : "unknown action: ") << key << std::endl;
-    std::cout << "action: " << action << std::endl;
-    std::cout << "mods: " << mods << std::endl;
+    if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+        switch (key) {
+        case GLFW_KEY_W:
+            camera->processKeyboard(FORWARD, delta_time);
+            break;
+        case GLFW_KEY_S:
+            camera->processKeyboard(BACKWARD, delta_time);
+            break;
+        case GLFW_KEY_A:
+            camera->processKeyboard(LEFT, delta_time);
+            break;
+        case GLFW_KEY_D:
+            camera->processKeyboard(RIGHT, delta_time);
+            break;
+        //  case GLFW_KEY_ESCAPE:
+        //	    APP->destroy();
+        //	    break;
+        default:
+            break;
+        }
+    }
+}
+
+void onMouseMove(double xpos_in, double ypos_in) {
+    float xpos = static_cast<float>(xpos_in);
+    float ypos = static_cast<float>(ypos_in);
+    
+
+    // first in, then do not react
+	if (first_mouse) { 
+        last_x = xpos; last_y = ypos;
+        first_mouse = false;
+		return;
+	}
+
+	float xoffset = xpos - last_x;
+	float yoffset = last_y - ypos; // reversed, because y-axis goes from bottom to top
+    last_x = xpos; last_y = ypos;
+    
+	camera->processMouseMovement(xoffset, yoffset, true);
+}
+
+// not in use
+void onMouseScroll(/* double xoffset, */double yoffset) {
+	camera->processMouseScroll(yoffset);
 }
 
 void prepareSingleBuffer() {
@@ -119,18 +174,23 @@ void prepareShader() {
 
 glm::mat4 model, view, projection;
 void render() {
+    /* Calculate time */
+    float current_frame = static_cast<float>(glfwGetTime());
+    delta_time = current_frame - last_frame;
+    last_frame = current_frame;
+
     /* Clear canvas */
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
 
     /* Set User Shader */
     shader->begin();    // Bind User Shader
-	shader->setFloat("time", glfwGetTime());
+	shader->setFloat("time", current_frame);
     // tmp
     //glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
     //glm::mat4 view = glm::mat4(1.0f);
     //glm::mat4 projection = glm::mat4(1.0f);
-    //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-    //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    //model = glm::rotate(model, current_frame, glm::vec3(0.5f, 1.0f, 0.0f));
+    view = camera->getViewMatrix();
     ////projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
     //projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 10.0f);
 
@@ -157,6 +217,8 @@ int main() {
     // set callback monitor
     APP->setResizeCallback(onResize);
     APP->setKeyboardCallback(onKeyChange);
+	APP->setMouseMoveCallback(onMouseMove);
+    APP->setMouseScrollCallback(onMouseScroll);
    
     GL_CALL(glViewport(0, 0, 800, 600));
     GL_CALL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
@@ -164,9 +226,13 @@ int main() {
     prepareInterleavedBuffer();
     prepareShader();
 
+    camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
     model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));  // move reverse
-    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    view = camera->getViewMatrix();
+    //projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
+    std::cout << "projection matrix: " << glm::to_string(projection).c_str() << std::endl;
 
     // window loop
     while (APP->update()) {
@@ -174,6 +240,8 @@ int main() {
     }
 
     APP->destroy();
+    delete camera;
+    delete shader;
 
     return 0;
 }

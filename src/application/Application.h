@@ -9,6 +9,8 @@
 
 using ResizeCB = void(*)(int, int);
 using KeyboardCB = void(*)(int, int, int, int);
+using MouseMoveCB = void(*)(double, double);
+using MouseScrollCB = void(*)(double);
 
 /* Application  
  *	- for windows encapsulation
@@ -30,6 +32,8 @@ public:
 	/* Set Event Callback */
 	void setResizeCallback(ResizeCB cb) { _resize_cb = cb; }
 	void setKeyboardCallback(KeyboardCB cb) { _keyboard_cb = cb; }
+	void setMouseMoveCallback(MouseMoveCB cb) { _mouse_move_cb = cb; }
+	void setMouseScrollCallback(MouseScrollCB cb) { _mouse_scroll_cb = cb; }
 
 private:
 	uint32_t _width  = 0;
@@ -41,7 +45,10 @@ private:
 	static void fbSizeCallback(GLFWwindow* window, int width, int height);
 	KeyboardCB _keyboard_cb = nullptr;
 	static void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
+	MouseMoveCB _mouse_move_cb = nullptr;
+	static void mouseMoveCallback(GLFWwindow* window, double xpos, double ypos);
+	MouseScrollCB _mouse_scroll_cb = nullptr;
+	static void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 	static Application* mInstance;
 	Application();

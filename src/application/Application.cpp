@@ -46,10 +46,12 @@ bool Application::init(const int& w = 800, const int& h = 600) {
 	/* Set Event Callback */
 	glfwSetFramebufferSizeCallback(_window, fbSizeCallback);
 	glfwSetKeyCallback(_window, keyboardCallback);
+	glfwSetCursorPosCallback(_window, mouseMoveCallback);
+	glfwSetScrollCallback(_window, mouseScrollCallback);
 
-	/* Restore 'this'(Unique Application Object) as GLFW User Pointer */
-	glfwSetWindowUserPointer(_window, this);
-
+	/* GLFW settings */
+	glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // capture the cursor
+	glfwSetWindowUserPointer(_window, this);	// store 'this' as glfw user pointer
 
 	return true;
 }
@@ -71,8 +73,7 @@ void Application::destroy() {
 }
 
 
-/* Event Callback Handlding */
-// static
+/* Event Callback Handlding: All static */
 void Application::fbSizeCallback(GLFWwindow* window, int width, int height) {
 #ifdef DEBUG
 	std::cout << "[Renew window] " << width << ", " << height << std::endl;
@@ -84,9 +85,27 @@ void Application::fbSizeCallback(GLFWwindow* window, int width, int height) {
 
 void Application::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 #ifdef DEBUG
-	std::cout << "[Keyboard event]" << std::endl;
+	// std::cout << "[Keyboard event]" << std::endl;
 #endif
 	Application* self = (Application*)glfwGetWindowUserPointer(window);
 	if (self->_keyboard_cb != nullptr)
 		self->_keyboard_cb(key, scancode, action, mods);
+}
+
+void Application::mouseMoveCallback(GLFWwindow* window, double xpos, double ypos) {
+#ifdef DEBUG
+	//std::cout << "[Mouse move event]" << std::endl;
+#endif
+	Application* self = (Application*)glfwGetWindowUserPointer(window);
+	if (self->_mouse_move_cb != nullptr)
+		self->_mouse_move_cb(xpos, ypos);
+}
+
+void Application::mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+#ifdef DEBUG
+	std::cout << "[Mouse scroll event]" << std::endl;
+#endif
+	Application* self = (Application*)glfwGetWindowUserPointer(window);
+	if (self->_mouse_scroll_cb != nullptr)
+		self->_mouse_scroll_cb(yoffset);
 }
