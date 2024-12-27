@@ -52,6 +52,7 @@ bool Application::init(const int& w = 800, const int& h = 600) {
 	/* GLFW settings */
 	glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // capture the cursor
 	glfwSetWindowUserPointer(_window, this);	// store 'this' as glfw user pointer
+	glEnable(GL_DEPTH_TEST);
 
 	return true;
 }

@@ -117,22 +117,21 @@ void prepareSingleBuffer() {
     GL_CALL(glDeleteBuffers(1, &pos_vbo));
 }
 
-
 void prepareInterleavedBuffer() {
     float pos_color[] = {
         -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
          0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
          0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
          0.5f,  0.5f, 0.0f, 0.4f, 0.5f, 0.6f,
-		 0.8f,  0.8f, 0.0f, 0.2f, 0.3f, 0.4f,
-		 0.8f,  0.0f, 0.0f, 0.7f, 0.8f, 0.9f
+         0.8f,  0.8f, 0.0f, 0.2f, 0.3f, 0.4f,
+         0.8f,  0.0f, 0.0f, 0.7f, 0.8f, 0.9f
     };
 
-	unsigned int index[] = {
-		0, 1, 2,
-		2, 3, 4,
-		4, 5, 0
-	};
+    unsigned int index[] = {
+        0, 1, 2,
+        2, 3, 4,
+        4, 5, 0
+    };
 
     /* Create VBO */
     GLuint pos_color_vbo = 0; // interleaved vbo
@@ -166,6 +165,70 @@ void prepareInterleavedBuffer() {
     //GL_CALL(glDeleteBuffers(1, &pos_color_vbo));
 }
 
+void prepareCubeBuffer() {
+    float cube_vertice[] = {
+        -0.5f, -0.5f, -0.5f, /* 0: - - - */
+         0.5f, -0.5f, -0.5f, /* 1: + - - */
+        -0.5f,  0.5f, -0.5f, /* 2: - + - */
+         0.5f,  0.5f, -0.5f, /* 3: + + - */
+        -0.5f, -0.5f,  0.5f, /* 4: - - + */
+         0.5f, -0.5f,  0.5f, /* 5: + - + */
+        -0.5f,  0.5f,  0.5f, /* 6: - + + */
+         0.5f,  0.5f,  0.5f, /* 7: + + + */
+    };
+    unsigned int cube_index[] = {
+        4, 5, 6,
+        6, 5, 7,
+        5, 1, 7,
+        7, 1, 3,
+        1, 0, 3,
+        3, 0, 2,
+        0, 4, 2,
+        2, 4, 6,
+        6, 7, 2,
+        2, 7, 3,
+        5, 4, 1,
+        1, 4, 0
+    };
+
+    /* Create VBO */
+    GLuint cube_vbo = 0; // interleaved vbo
+    GL_CALL(glGenBuffers(1, &cube_vbo));
+    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, cube_vbo)); // bind vbo
+    GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertice), cube_vertice, GL_STATIC_DRAW)); // send data
+
+    /* Create EBO */
+    GLuint cube_ebo = 0;
+    GL_CALL(glGenBuffers(1, &cube_ebo));
+    GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_ebo)); // bind ebo
+    GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_index), cube_index, GL_STATIC_DRAW)); // send data
+
+    /* Create VAO */
+    GL_CALL(glGenVertexArrays(1, &vao));
+
+    /* Bind VBO & EBO with VAO */
+    setVAO(vao, {
+        /* Position vao */
+        GL_CALL(glEnableVertexAttribArray(0));
+        GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0)); // connect current vao with vbo
+
+        /* ebo */
+        GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_ebo)); // connect current vao with ebo
+    });
+}
+
+glm::vec3 object_positon[] = {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f)
+        //glm::vec3(-3.8f, -2.0f, -12.3f),
+        //glm::vec3(2.4f, -0.4f, -3.5f),
+        //glm::vec3(-1.7f,  3.0f, -7.5f),
+        //glm::vec3(1.3f, -2.0f, -2.5f),
+        //glm::vec3(1.5f,  2.0f, -2.5f),
+        //glm::vec3(1.5f,  0.2f, -1.5f),
+        //glm::vec3(-1.3f,  1.0f, -1.5f)
+};
 
 void prepareShader() {
 	shader = new Shader("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
@@ -180,29 +243,35 @@ void render() {
     last_frame = current_frame;
 
     /* Clear canvas */
-    GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
+    GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
     /* Set User Shader */
     shader->begin();    // Bind User Shader
 	shader->setFloat("time", current_frame);
-    // tmp
-    //glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-    //glm::mat4 view = glm::mat4(1.0f);
-    //glm::mat4 projection = glm::mat4(1.0f);
-    //model = glm::rotate(model, current_frame, glm::vec3(0.5f, 1.0f, 0.0f));
+
+    /* set MVP */
+    model = glm::rotate(model, current_frame, glm::vec3(0.5f, 1.0f, 0.0f));
     view = camera->getViewMatrix();
-    ////projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
     //projection = glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 10.0f);
 
-	shader->setMat4f("model", glm::value_ptr(model));
+	//shader->setMat4f("model", glm::value_ptr(model));
 	shader->setMat4f("view", glm::value_ptr(view));
 	shader->setMat4f("projection", glm::value_ptr(projection));
 
-    /* Set VAO */
+    /* Render & Draw */
 	GL_CALL(glBindVertexArray(vao)); // Bind Current VAO
     
     /* Draw */
-    GL_CALL(glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0));
+    for (int i = 0; i < 3; i++) {
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, object_positon[i]);
+		float angle = 20.0f * i;
+		model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+		shader->setMat4f("model", glm::value_ptr(model));
+		GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+    }
+    //GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
     
     /* End Clear */
 	GL_CALL(glBindVertexArray(0));  // De-Bind Current VAO
@@ -223,16 +292,11 @@ int main() {
     GL_CALL(glViewport(0, 0, 800, 600));
     GL_CALL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
 
-    prepareInterleavedBuffer();
+    //prepareInterleavedBuffer();
+    prepareCubeBuffer();
     prepareShader();
 
     camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
-
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    view = camera->getViewMatrix();
-    //projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-	projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.1f, 100.0f);
-    std::cout << "projection matrix: " << glm::to_string(projection).c_str() << std::endl;
 
     // window loop
     while (APP->update()) {
