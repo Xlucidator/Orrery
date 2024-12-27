@@ -117,6 +117,11 @@ void Shader::setInt(const std::string& name, int value) const {
 	GL_CALL(glUniform1i(location, value));
 }
 
+void Shader::setMat3f(const std::string& name, const float* value) const {
+	GLint location = glGetUniformLocation(_program, name.c_str());
+	GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE, value));
+}
+
 void Shader::setMat4f(const std::string& name, const float* value) const {
 	GLint location = glGetUniformLocation(_program, name.c_str());
 	GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, value));

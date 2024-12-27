@@ -169,30 +169,46 @@ void prepareInterleavedBuffer() {
     //GL_CALL(glDeleteBuffers(1, &pos_color_vbo));
 }
 
-void prepareCubeBuffer() {
+void prepareCubeBufferEBO() {
+    //float cube_vertice[] = {
+    //    -0.5f, -0.5f, -0.5f, /* 0: - - - */
+    //     0.5f, -0.5f, -0.5f, /* 1: + - - */
+    //    -0.5f,  0.5f, -0.5f, /* 2: - + - */
+    //     0.5f,  0.5f, -0.5f, /* 3: + + - */
+    //    -0.5f, -0.5f,  0.5f, /* 4: - - + */
+    //     0.5f, -0.5f,  0.5f, /* 5: + - + */
+    //    -0.5f,  0.5f,  0.5f, /* 6: - + + */
+    //     0.5f,  0.5f,  0.5f, /* 7: + + + */
+    //};
+    //float cube_vertice[] = {
+    //    // Position            // Normal
+    //    -0.5f, -0.5f, -0.5f,  -0.577f, -0.577f, -0.577f,  // 0
+    //     0.5f, -0.5f, -0.5f,   0.577f, -0.577f, -0.577f,  // 1
+    //    -0.5f,  0.5f, -0.5f,  -0.577f,  0.577f, -0.577f,  // 2
+    //     0.5f,  0.5f, -0.5f,   0.577f,  0.577f, -0.577f,  // 3
+    //    -0.5f, -0.5f,  0.5f,  -0.577f, -0.577f,  0.577f,  // 4
+    //     0.5f, -0.5f,  0.5f,   0.577f, -0.577f,  0.577f,  // 5
+    //    -0.5f,  0.5f,  0.5f,  -0.577f,  0.577f,  0.577f,  // 6
+    //     0.5f,  0.5f,  0.5f,   0.577f,  0.577f,  0.577f,  // 7
+    //};
     float cube_vertice[] = {
-        -0.5f, -0.5f, -0.5f, /* 0: - - - */
-         0.5f, -0.5f, -0.5f, /* 1: + - - */
-        -0.5f,  0.5f, -0.5f, /* 2: - + - */
-         0.5f,  0.5f, -0.5f, /* 3: + + - */
-        -0.5f, -0.5f,  0.5f, /* 4: - - + */
-         0.5f, -0.5f,  0.5f, /* 5: + - + */
-        -0.5f,  0.5f,  0.5f, /* 6: - + + */
-         0.5f,  0.5f,  0.5f, /* 7: + + + */
+        // Position            // Normal
+        -0.5f, -0.5f, -0.5f,  -1.0f, -1.0f, -2.0f,  // 0
+         0.5f, -0.5f, -0.5f,   2.0f, -2.0f, -1.0f,  // 1
+        -0.5f,  0.5f, -0.5f,  -2.0f,  2.0f, -1.0f,  // 2
+         0.5f,  0.5f, -0.5f,   1.0f,  1.0f, -2.0f,  // 3
+        -0.5f, -0.5f,  0.5f,  -2.0f, -2.0f,  1.0f,  // 4
+         0.5f, -0.5f,  0.5f,   1.0f, -1.0f,  2.0f,  // 5
+        -0.5f,  0.5f,  0.5f,  -1.0f,  1.0f,  2.0f,  // 6
+         0.5f,  0.5f,  0.5f,   2.0f,  2.0f,  1.0f,  // 7
     };
     unsigned int cube_index[] = {
-        4, 5, 6,
-        6, 5, 7,
-        5, 1, 7,
-        7, 1, 3,
-        1, 0, 3,
-        3, 0, 2,
-        0, 4, 2,
-        2, 4, 6,
-        6, 7, 2,
-        2, 7, 3,
-        5, 4, 1,
-        1, 4, 0
+        4, 5, 6,  6, 5, 7, /* +z */
+        5, 1, 7,  7, 1, 3, /* +x */
+        1, 0, 3,  3, 0, 2, /* -z */
+        0, 4, 2,  2, 4, 6, /* -x */
+        6, 7, 2,  2, 7, 3, /* +y */
+        5, 4, 1,  1, 4, 0, /* -y */
     };
 
     /* Create VBO */
@@ -209,25 +225,122 @@ void prepareCubeBuffer() {
 
     /* Create VAO */
     GL_CALL(glGenVertexArrays(1, &vao));
+    GL_CALL(glGenVertexArrays(1, &light_vao));
+
+    /* Bind VBO & EBO with VAO */
+    setVAO(vao, {
+        /* Position vao */
+        GL_CALL(glEnableVertexAttribArray(0));
+        GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0)); // connect current vao with vbo
+        /* Normal vao */
+        GL_CALL(glEnableVertexAttribArray(1));
+        GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))));
+
+        /* ebo */
+        GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_ebo)); // connect current vao with ebo
+        });
+
+    setVAO(light_vao, {
+        /* Use the same VBO */
+        GL_CALL(glEnableVertexAttribArray(0));
+        GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0));
+
+        /* ebo */
+        GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_ebo)); // connect current vao with ebo
+        });
+}
+
+void prepareCubeBuffer() {
+    //float cube_vertice[] = {
+    //    -0.5f, -0.5f, -0.5f, /* 0: - - - */
+    //     0.5f, -0.5f, -0.5f, /* 1: + - - */
+    //    -0.5f,  0.5f, -0.5f, /* 2: - + - */
+    //     0.5f,  0.5f, -0.5f, /* 3: + + - */
+    //    -0.5f, -0.5f,  0.5f, /* 4: - - + */
+    //     0.5f, -0.5f,  0.5f, /* 5: + - + */
+    //    -0.5f,  0.5f,  0.5f, /* 6: - + + */
+    //     0.5f,  0.5f,  0.5f, /* 7: + + + */
+    //};
+    //float cube_vertice[] = {
+    //    // Position            // Normal
+    //    -0.5f, -0.5f, -0.5f,  -0.577f, -0.577f, -0.577f,  // 0
+    //     0.5f, -0.5f, -0.5f,   0.577f, -0.577f, -0.577f,  // 1
+    //    -0.5f,  0.5f, -0.5f,  -0.577f,  0.577f, -0.577f,  // 2
+    //     0.5f,  0.5f, -0.5f,   0.577f,  0.577f, -0.577f,  // 3
+    //    -0.5f, -0.5f,  0.5f,  -0.577f, -0.577f,  0.577f,  // 4
+    //     0.5f, -0.5f,  0.5f,   0.577f, -0.577f,  0.577f,  // 5
+    //    -0.5f,  0.5f,  0.5f,  -0.577f,  0.577f,  0.577f,  // 6
+    //     0.5f,  0.5f,  0.5f,   0.577f,  0.577f,  0.577f,  // 7
+    //};
+    float cube_vertice[] = {
+		// Position           // Normal
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+    };
+
+    /* Create VBO */
+    GLuint cube_vbo = 0; // interleaved vbo
+    GL_CALL(glGenBuffers(1, &cube_vbo));
+    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, cube_vbo)); // bind vbo
+    GL_CALL(glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertice), cube_vertice, GL_STATIC_DRAW)); // send data
+
+    /* Create VAO */
+    GL_CALL(glGenVertexArrays(1, &vao));
 	GL_CALL(glGenVertexArrays(1, &light_vao));
 
     /* Bind VBO & EBO with VAO */
     setVAO(vao, {
         /* Position vao */
         GL_CALL(glEnableVertexAttribArray(0));
-        GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0)); // connect current vao with vbo
-
-        /* ebo */
-        GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_ebo)); // connect current vao with ebo
+        GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0)); // connect current vao with vbo
+        /* Normal vao */
+		GL_CALL(glEnableVertexAttribArray(1));
+		GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))));
     });
 
     setVAO(light_vao, {
         /* Use the same VBO */
 		GL_CALL(glEnableVertexAttribArray(0));
-	    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0));
-
-        /* ebo */
-        GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_ebo)); // connect current vao with ebo
+	    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0));
     });
 }
 
@@ -251,6 +364,7 @@ void prepareShader() {
 
 
 glm::mat4 model, view, projection;
+glm::mat3 norm_model;
 void render() {
     /* Calculate time */
     float current_frame = static_cast<float>(glfwGetTime());
@@ -271,6 +385,9 @@ void render() {
     obj_shader->begin();
 	obj_shader->setVec3f("objectColor", 1.0f, 0.5f, 0.31f);
 	obj_shader->setVec3f("lightColor", 1.0f, 1.0f, 1.0f);
+	obj_shader->setVec3f("lightPos", glm::value_ptr(light_pos));
+	obj_shader->setVec3f("viewPos", glm::value_ptr(camera->position));
+
 	obj_shader->setMat4f("view", glm::value_ptr(view));
 	obj_shader->setMat4f("projection", glm::value_ptr(projection));
 
@@ -279,7 +396,13 @@ void render() {
 		model = glm::mat4(1.0f);
         model = glm::translate(model, object_positon[i]);
 		obj_shader->setMat4f("model", glm::value_ptr(model));
-		GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+
+        norm_model = glm::mat3(model);
+		norm_model = glm::transpose(glm::inverse(norm_model));
+		obj_shader->setMat3f("normModel", glm::value_ptr(norm_model));
+        
+        GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 36));
+        //GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
     }
 	GL_CALL(glBindVertexArray(0));
 
@@ -295,7 +418,8 @@ void render() {
     model = glm::translate(model, light_pos);
     model = glm::scale(model, glm::vec3(0.2f)); // let the light cube be smaller
     light_shader->setMat4f("model", glm::value_ptr(model));
-    GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+    //GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+    GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 36));
     GL_CALL(glBindVertexArray(0));
 
     light_shader->end();
@@ -313,7 +437,8 @@ int main() {
     APP->setMouseScrollCallback(onMouseScroll);
    
     GL_CALL(glViewport(0, 0, viewport_width, viewport_height));
-    GL_CALL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
+    //GL_CALL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
+    GL_CALL(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
 
     //prepareInterleavedBuffer();
     prepareCubeBuffer();
