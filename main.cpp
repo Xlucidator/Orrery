@@ -30,6 +30,7 @@ bool keyboard[128] = { false };
 GLuint light_vao = 0;
 Shader* light_shader = nullptr;
 glm::vec3 light_pos(1.2f, 1.0f, 2.0f);
+glm::vec3 light_color;
 
 /* Callback Handler */
 void onResize(int width, int height) {
@@ -383,11 +384,24 @@ void render() {
 
     /* === Object Rendering === */
     obj_shader->begin();
-	obj_shader->setVec3f("objectColor", 1.0f, 0.5f, 0.31f);
-	obj_shader->setVec3f("lightColor", 1.0f, 1.0f, 1.0f);
-	obj_shader->setVec3f("lightPos", glm::value_ptr(light_pos));
+    // light
+    light_color.x = sin(current_frame * 2.0f);
+	light_color.y = sin(current_frame * 0.7f);
+	light_color.z = sin(current_frame * 1.3f);
+	glm::vec3 diffuse_color = light_color * glm::vec3(0.5f); // decrease the influence
+	glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f); // low influence
+	obj_shader->setVec3f("light.position", glm::value_ptr(light_pos));
+	obj_shader->setVec3f("light.ambient", glm::value_ptr(ambient_color));
+	obj_shader->setVec3f("light.diffuse", glm::value_ptr(diffuse_color));
+	obj_shader->setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
+    // camera
 	obj_shader->setVec3f("viewPos", glm::value_ptr(camera->position));
-
+    // material
+    obj_shader->setVec3f("material.ambient", 1.0f, 0.5f, 0.31f);
+    obj_shader->setVec3f("material.diffuse", 1.0f, 0.5f, 0.31f);
+    obj_shader->setVec3f("material.specular", 0.5f, 0.5f, 0.5f);
+    obj_shader->setFloat("material.shininess", 32.0f);
+    // mvp
 	obj_shader->setMat4f("view", glm::value_ptr(view));
 	obj_shader->setMat4f("projection", glm::value_ptr(projection));
 
