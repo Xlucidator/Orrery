@@ -372,7 +372,7 @@ void prepareModel() {
 }
 
 void prepareShader() {
-	obj_shader = new Shader("assets/shaders/loadobj.vert", "assets/shaders/loadobj.frag");
+	obj_shader = new Shader("assets/shaders/loadobj_nolight.vert", "assets/shaders/loadobj_nolight.frag");
 	light_shader = new Shader("assets/shaders/light_item.vert", "assets/shaders/light_item.frag");
 }
 
@@ -504,7 +504,7 @@ int main() {
    
     GL_CALL(glViewport(0, 0, viewport_width, viewport_height));
     //GL_CALL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
-    GL_CALL(glClearColor(0.05f, 0.05f, 0.05f, 1.0f));
+    GL_CALL(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
 
     //prepareInterleavedBuffer();
     //prepareCubeBuffer();
@@ -524,6 +524,8 @@ int main() {
     delete light_shader;
     for (auto model : models)
         delete model;
+
+    std::cout << "cleared" << std::endl;
 
     return 0;
 }

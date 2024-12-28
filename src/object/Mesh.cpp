@@ -15,14 +15,16 @@ void Mesh::draw(Shader* shader) {
 	/* Set Texture Units */
 	uint32_t diffuse_num = 1; // at least 16, type can be smaller
 	uint32_t specular_num = 1;
+	uint32_t normal_num = 1;
 	for (int i = 0; i < textures.size(); i++) {
 		GL_CALL(glActiveTexture(GL_TEXTURE0 + i)); // activate texture unit i
 		
 		// set the sampler to the correct texture unit
 		std::string number;
 		std::string name = textures[i].type;
-		if	    (name == "texture_diffuse" ) number = std::to_string(diffuse_num++);
+		if (name == "texture_diffuse")	number = std::to_string(diffuse_num++);
 		else if (name == "texture_specular") number = std::to_string(specular_num++);
+		else if (name == "texture_normal") number = std::to_string(normal_num++);
 		shader->setInt("material." + name + number, i);  // bind "material.texture_xxn" sampler (sample2D) to texture unit i
 
 		GL_CALL(glBindTexture(GL_TEXTURE_2D, textures[i].id)); // bind to textures[i] to texture unit i

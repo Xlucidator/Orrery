@@ -15,6 +15,7 @@ void Model::draw(Shader* shader) {
 }
 
 void Model::load(std::string& path) {
+	stbi_set_flip_vertically_on_load(true); // reverse texture picture y axis
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs/* | aiProcess_GenNormals*/);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -65,12 +66,15 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	/* Get Textures */
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		// texture diffuse
+		// diffuse texture
 		std::vector<Texture> diffuse_maps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuse_maps.begin(), diffuse_maps.end());
-		// texture specular
+		// specular texture
 		std::vector<Texture> specular_maps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specular_maps.begin(), specular_maps.end());
+		// normal texture
+		std::vector<Texture> normal_maps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		textures.insert(textures.end(), normal_maps.begin(), normal_maps.end());
 	}
 
 	return Mesh(vertices, indices, textures);
