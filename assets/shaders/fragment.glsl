@@ -18,8 +18,8 @@ uniform vec3 viewPos;
 
 // Object
 struct Material {
-    vec3 ambient;
-    vec3 diffuse;
+    vec3 ambient; 
+    vec3 diffuse; 
     vec3 specular;
     float shininess;
 }; 
@@ -27,7 +27,7 @@ uniform Material material;
 
 void main() {
     vec3 norm = normalize(Normal);
-
+    
     // Ambient
     vec3 ambient = material.ambient * light.ambient;
 

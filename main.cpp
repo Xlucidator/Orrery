@@ -1,5 +1,6 @@
 
 #include <string>
+#include <vector>
 
 #include "common.h"
 #include "utils.h"
@@ -7,32 +8,36 @@
 #include "application/Application.h"
 #include "shader/Shader.h"
 #include "camera/Camera.h"
+#include "object/Model.h"
 
 
-/* Application settings */
+/*=== Application settings ===*/
 GLuint vao = 0;
 Shader* obj_shader = nullptr;
 uint32_t viewport_width = 800, viewport_height = 600;
 
-/* Time */
+/*=== Time ===*/
 float last_frame = 0.0f;
 float delta_time = 0.0f;
 
-/* Camera */
+/*=== Camera ===*/
 Camera* camera = nullptr;
 bool first_mouse = true;
 float last_x = (float)viewport_width / 2.0f, last_y = (float)viewport_height / 2.0f;
 
-/* Input */
+/*=== Input ===*/
 bool keyboard[128] = { false };
 
-/* Light */
+/*=== Light ===*/
 GLuint light_vao = 0;
 Shader* light_shader = nullptr;
 glm::vec3 light_pos(1.2f, 1.0f, 2.0f);
 glm::vec3 light_color;
 
-/* Callback Handler */
+/*=== Model ===*/
+std::vector<Model*> models;
+
+/*=== Callback Handler ===*/
 void onResize(int width, int height) {
     std::cout << "onResize" << std::endl;
     GL_CALL(glViewport(0, 0, width, height));
@@ -80,7 +85,7 @@ void onMouseScroll(/* double xoffset, */double yoffset) {
 }
 
 
-/* Preparations */
+/*=== Preparations ===*/
 void prepareSingleBuffer() {
     float vtx[] = {
         -0.5f, -0.5f, 0.0f,
@@ -274,48 +279,48 @@ void prepareCubeBuffer() {
     //     0.5f,  0.5f,  0.5f,   0.577f,  0.577f,  0.577f,  // 7
     //};
     float cube_vertice[] = {
-		// Position           // Normal
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
 
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
     };
 
     /* Create VBO */
@@ -332,16 +337,19 @@ void prepareCubeBuffer() {
     setVAO(vao, {
         /* Position vao */
         GL_CALL(glEnableVertexAttribArray(0));
-        GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0)); // connect current vao with vbo
+        GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0)); // connect current vao with vbo
         /* Normal vao */
 		GL_CALL(glEnableVertexAttribArray(1));
-		GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))));
+		GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float))));
+        /* Texture vao */
+        GL_CALL(glEnableVertexAttribArray(2));
+        GL_CALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float))));
     });
 
     setVAO(light_vao, {
         /* Use the same VBO */
 		GL_CALL(glEnableVertexAttribArray(0));
-	    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0));
+	    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0));
     });
 }
 
@@ -358,12 +366,22 @@ glm::vec3 object_positon[] = {
         //glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
+void prepareModel() {
+    Model* backpack = new Model("assets/objects/backpack/backpack.obj");
+    models.push_back(backpack);
+}
+
 void prepareShader() {
-	obj_shader = new Shader("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
+	obj_shader = new Shader("assets/shaders/loadobj.vert", "assets/shaders/loadobj.frag");
 	light_shader = new Shader("assets/shaders/light_item.vert", "assets/shaders/light_item.frag");
 }
 
+void prepareTexture() {
 
+}
+
+
+/*=== Render ===*/
 glm::mat4 model, view, projection;
 glm::mat3 norm_model;
 void render() {
@@ -385,58 +403,92 @@ void render() {
     /* === Object Rendering === */
     obj_shader->begin();
     // light
-    light_color.x = sin(current_frame * 2.0f);
-	light_color.y = sin(current_frame * 0.7f);
-	light_color.z = sin(current_frame * 1.3f);
-	glm::vec3 diffuse_color = light_color * glm::vec3(0.5f); // decrease the influence
-	glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f); // low influence
-	obj_shader->setVec3f("light.position", glm::value_ptr(light_pos));
-	obj_shader->setVec3f("light.ambient", glm::value_ptr(ambient_color));
-	obj_shader->setVec3f("light.diffuse", glm::value_ptr(diffuse_color));
-	obj_shader->setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
+ //   light_color = glm::vec3(0.7f);
+	//glm::vec3 diffuse_color = light_color * glm::vec3(0.5f); // decrease the influence
+	//glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f); // low influence
+	//obj_shader->setVec3f("light.position", glm::value_ptr(light_pos));
+	//obj_shader->setVec3f("light.ambient", glm::value_ptr(ambient_color));
+	//obj_shader->setVec3f("light.diffuse", glm::value_ptr(diffuse_color));
+	//obj_shader->setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
     // camera
-	obj_shader->setVec3f("viewPos", glm::value_ptr(camera->position));
+	//obj_shader->setVec3f("viewPos", glm::value_ptr(camera->position));
+    // object
+    //obj_shader->setFloat("material.shininess", 32.0f);
+    // 
+    // mvp
+	obj_shader->setMat4f("view", glm::value_ptr(view));
+	obj_shader->setMat4f("projection", glm::value_ptr(projection));
+
+    model = glm::mat4(1.0f); // model
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+    obj_shader->setMat4f("model", glm::value_ptr(model));
+    //norm_model = glm::mat3(model); // norm_model
+    //norm_model = glm::transpose(glm::inverse(norm_model));
+    //obj_shader->setMat3f("normModel", glm::value_ptr(norm_model));
+
+    models[0]->draw(obj_shader);
+
+    obj_shader->end();
+
+	/* === Light Rendering === */
+ //   light_shader->begin();
+	//light_shader->setMat4f("view", glm::value_ptr(view));
+	//light_shader->setMat4f("projection", glm::value_ptr(projection));
+ //   
+ //   GL_CALL(glBindVertexArray(light_vao));
+ //   model = glm::mat4(1.0f);
+ //   model = glm::translate(model, light_pos);
+ //   model = glm::scale(model, glm::vec3(0.2f)); // let the light cube be smaller
+ //   light_shader->setMat4f("model", glm::value_ptr(model));
+ //   //GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
+ //   GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 36));
+ //   GL_CALL(glBindVertexArray(0));
+
+ //   light_shader->end();
+}
+
+void drawCube(float& current_time, glm::mat4& view, glm::mat4& projection) {
+    obj_shader->begin();
+
+    // light
+    light_color.x = sin(current_time * 2.0f);
+    light_color.y = sin(current_time * 0.7f);
+    light_color.z = sin(current_time * 1.3f);
+    glm::vec3 diffuse_color = light_color * glm::vec3(0.5f); // decrease the influence
+    glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f); // low influence
+    obj_shader->setVec3f("light.position", glm::value_ptr(light_pos));
+    obj_shader->setVec3f("light.ambient", glm::value_ptr(ambient_color));
+    obj_shader->setVec3f("light.diffuse", glm::value_ptr(diffuse_color));
+    obj_shader->setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
+    // camera
+    obj_shader->setVec3f("viewPos", glm::value_ptr(camera->position));
+    // object
     // material
     obj_shader->setVec3f("material.ambient", 1.0f, 0.5f, 0.31f);
     obj_shader->setVec3f("material.diffuse", 1.0f, 0.5f, 0.31f);
     obj_shader->setVec3f("material.specular", 0.5f, 0.5f, 0.5f);
     obj_shader->setFloat("material.shininess", 32.0f);
     // mvp
-	obj_shader->setMat4f("view", glm::value_ptr(view));
-	obj_shader->setMat4f("projection", glm::value_ptr(projection));
+    obj_shader->setMat4f("view", glm::value_ptr(view));
+    obj_shader->setMat4f("projection", glm::value_ptr(projection));
 
     GL_CALL(glBindVertexArray(vao));
     for (int i = 0; i < 1; i++) {
-		model = glm::mat4(1.0f);
+        glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, object_positon[i]);
-		obj_shader->setMat4f("model", glm::value_ptr(model));
+        obj_shader->setMat4f("model", glm::value_ptr(model));
 
         norm_model = glm::mat3(model);
-		norm_model = glm::transpose(glm::inverse(norm_model));
-		obj_shader->setMat3f("normModel", glm::value_ptr(norm_model));
-        
+        norm_model = glm::transpose(glm::inverse(norm_model));
+        obj_shader->setMat3f("normModel", glm::value_ptr(norm_model));
+
         GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 36));
         //GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
     }
-	GL_CALL(glBindVertexArray(0));
-
-    obj_shader->end();
-
-	/* === Light Rendering === */
-    light_shader->begin();
-	light_shader->setMat4f("view", glm::value_ptr(view));
-	light_shader->setMat4f("projection", glm::value_ptr(projection));
-    
-    GL_CALL(glBindVertexArray(light_vao));
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, light_pos);
-    model = glm::scale(model, glm::vec3(0.2f)); // let the light cube be smaller
-    light_shader->setMat4f("model", glm::value_ptr(model));
-    //GL_CALL(glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0));
-    GL_CALL(glDrawArrays(GL_TRIANGLES, 0, 36));
     GL_CALL(glBindVertexArray(0));
 
-    light_shader->end();
+    obj_shader->end();
 }
 
 
@@ -452,10 +504,11 @@ int main() {
    
     GL_CALL(glViewport(0, 0, viewport_width, viewport_height));
     //GL_CALL(glClearColor(0.2f, 0.3f, 0.3f, 1.0f));
-    GL_CALL(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
+    GL_CALL(glClearColor(0.05f, 0.05f, 0.05f, 1.0f));
 
     //prepareInterleavedBuffer();
-    prepareCubeBuffer();
+    //prepareCubeBuffer();
+    prepareModel();
     prepareShader();
 
     camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -469,6 +522,8 @@ int main() {
     delete camera;
     delete obj_shader;
     delete light_shader;
+    for (auto model : models)
+        delete model;
 
     return 0;
 }

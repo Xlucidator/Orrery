@@ -22,12 +22,15 @@ add_executable(EscapeDungeon
 	${MAIN} 
 	${SRC_INNER}
 )
-target_link_libraries(EscapeDungeon glfw3.lib)
+target_link_libraries(EscapeDungeon glfw3.lib assimp.lib)
 
 # assets
 file(GLOB ASSETS "./assets")
 file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
 
+# dlls
+file(GLOB DLLS "./thirdparty/lib/*.dll")
+file(COPY ${DLLS} DESTINATION ${CMAKE_BINARY_DIR})
 
 # libs
 # file(GLOB LIBS "./libs/*.cpp")
