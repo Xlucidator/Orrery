@@ -45,6 +45,22 @@ private:
 	/*=== Shader ===*/
 	std::shared_ptr<Shader> _global_shader;
 
+	/*=== Physics ===*/
+	// PhysX Variables
+	physx::PxDefaultAllocator		mAllocator;
+	physx::PxDefaultErrorCallback	mErrorCallback;
+	physx::PxDefaultCpuDispatcher*	mDispatcher = nullptr;
+	physx::PxTolerancesScale		mToleranceScale;
+
+	physx::PxFoundation*			mFoundation = nullptr;
+	physx::PxPhysics*				mPhysics = nullptr;
+	
+	physx::PxScene*					mScene = nullptr;
+	physx::PxMaterial*				mMaterial = nullptr;
+	physx::PxCooking*				mCooking = nullptr;
+	
+	physx::PxPvd*					mPvd = nullptr;
+
 	void initPhysics();
 	void initObjects();	
 };

@@ -55,19 +55,65 @@ void World::render() {
 }
 
 void World::initObjects() {
-	// load shader & model
+	// Load Shader & Model
 	_global_shader = std::make_shared<Shader>(
 		"assets/shaders/loadobj_nolight.vert", 
 		"assets/shaders/loadobj_nolight.frag"
 	);
 	auto backpack = std::make_shared<Model>("assets/objects/backpack/backpack.obj");
 
-	// create objects
+	// Create Objects
+	glm::mat4 model;
+	glm::vec3 location = glm::vec3(2.0f, 5.0f, -15.0f);
 	_objects.emplace_back(_global_shader, backpack);
+	_objects.emplace_back(_global_shader, backpack, glm::translate(model, location));
 }
 
 void World::initPhysics() {
+	std::cout << "Init PhysX" << std::endl;
 
+	/* Initialize PhysX */
+	// Create Foundation
+	mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, mAllocator, mErrorCallback);
+	if (!mFoundation) throw("PxCreateFoundation failed!");
+
+	// Create PVD
+	mPvd = PxCreatePvd(*mFoundation);
+	physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
+	mPvd->connect(*transport, physx::PxPvdInstrumentationFlag::eALL);
+
+	// Creat Physics with Tolerance Scale
+	// mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true, mPvd); // Without
+	mToleranceScale.length = 100; // typical length of an object
+	mToleranceScale.speed = 981; // typical speed of an object, gravity*1s is a reasonable choice
+	mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, mToleranceScale, true, mPvd);
+	// mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, mToleranceScale); // do not use PVD
+
+	// Creat SceneDesc
+	physx::PxSceneDesc scene_desc(mPhysics->getTolerancesScale());
+	scene_desc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+
+	// Create CPU Dispatcher
+	mDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
+	scene_desc.cpuDispatcher = mDispatcher;
+	scene_desc.filterShader = physx::PxDefaultSimulationFilterShader;
+
+	// Create Scene
+	mScene = mPhysics->createScene(scene_desc);
+
+	// Pvd Client
+	physx::PxPvdSceneClient* pvd_client = mScene->getScenePvdClient();
+	if (pvd_client) {
+		pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+		pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+		pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+	}
+
+	/* Create Simulation */
+	mMaterial = mPhysics->createMaterial(0.5f, 0.5f, 0.6f); // static friction, dynamic friction, restitution
+	physx::PxRigidStatic* ground_plane = physx::PxCreatePlane(*mPhysics, physx::PxPlane(0.0f, 1.0f, 0.0f, 1.0f), *mMaterial);
+	mScene->addActor(*ground_plane);
+	//boxes.push_back(ground_plane);
 }
 
 
