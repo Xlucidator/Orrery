@@ -54,6 +54,10 @@ bool Application::init(const int& w = 800, const int& h = 600) {
 	glfwSetWindowUserPointer(_window, this);	// store 'this' as glfw user pointer
 	glEnable(GL_DEPTH_TEST);
 
+	/* Init Windows Viewport and Background Color */
+	GL_CALL(glViewport(0, 0, _width, _height));
+	GL_CALL(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
+
 	return true;
 }
 
@@ -71,6 +75,7 @@ bool Application::update() {
 
 void Application::destroy() {
 	glfwTerminate();
+	delete mInstance;
 }
 
 

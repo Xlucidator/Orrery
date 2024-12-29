@@ -13,8 +13,9 @@ World::World() {
 	/* Init Light */
 	_light_pos = glm::vec3(1.2f, 1.0f, 2.0f);
 	_light_color = glm::vec3(1.0f);
+}
 
-	/* Init Objects */
+void World::init() {
 	initObjects();
 }
 
@@ -24,6 +25,8 @@ void World::update() {
 	_delta_time = current_frame - _last_frame;
 	_last_frame = current_frame;
 
+	/* React to Input */
+	processKeyboardInput();
 }
 
 void World::render() {
@@ -67,3 +70,19 @@ void World::initPhysics() {
 
 }
 
+
+/*=== Interact ===*/
+void World::processKeyboardInput() {
+	if (keyboard[GLFW_KEY_W]) _camera.processKeyboard(FORWARD, _delta_time);
+	if (keyboard[GLFW_KEY_S]) _camera.processKeyboard(BACKWARD, _delta_time);
+	if (keyboard[GLFW_KEY_A]) _camera.processKeyboard(LEFT, _delta_time);
+	if (keyboard[GLFW_KEY_D]) _camera.processKeyboard(RIGHT, _delta_time);
+}
+
+void World::processMouseMovement(float xoffset, float yoffset) {
+	_camera.processMouseMovement(xoffset, yoffset, true);
+}
+
+void World::processMouseScroll(float yoffset) {
+	_camera.processMouseScroll(yoffset);
+}

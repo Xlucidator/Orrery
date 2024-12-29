@@ -3,13 +3,6 @@
 
 #include "common.h"
 
-enum CameraMovement {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT
-};
-
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
 const float SPEED = 5.0f;
@@ -36,7 +29,7 @@ public:
 
 	glm::mat4 getViewMatrix() { return glm::lookAt(position, position + front, up); }
 
-	void processKeyboard(CameraMovement direction, float deltaTime);
+	void processKeyboard(Movement direction, float deltaTime);
 	void processMouseMovement(float xoffset, float yoffset, GLboolean constrain_pitch = true);
 	void processMouseScroll(float yoffset);
 

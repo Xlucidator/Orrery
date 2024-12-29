@@ -5,12 +5,6 @@
 
 #define APP (Application::getInstance())
 
-//class GLFWwindow;
-
-using ResizeCB = void(*)(int, int);
-using KeyboardCB = void(*)(int, int, int, int);
-using MouseMoveCB = void(*)(double, double);
-using MouseScrollCB = void(*)(double);
 
 /* Application  
  *	- for windows encapsulation

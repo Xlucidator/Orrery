@@ -15,7 +15,7 @@ Camera::~Camera() {
 
 
 /* Camera Movement */
-void Camera::processKeyboard(CameraMovement direction, float delta_t) {
+void Camera::processKeyboard(Movement direction, float delta_t) {
 	float velocity = movement_speed * delta_t;
 	switch (direction) {
 		case FORWARD: position += front * velocity; break;

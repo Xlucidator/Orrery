@@ -5,13 +5,6 @@
 
 /* Interact Interface Defination */
 
-enum Movement {
-	FORWARD,
-	BACKWARD,
-	LEFT,
-	RIGHT
-};
-
 class Interactable {
 public:
 	virtual void processKeyboard(Movement direction, float deltaTime) = 0;

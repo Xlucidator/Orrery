@@ -11,13 +11,17 @@
 
 class World {
 public:
-	
-
 	World();
 	~World() = default;
 
+	void init();
 	void update();
 	void render();
+
+	/*=== Interact ===*/
+	void processKeyboardInput();
+	void processMouseMovement(float xoffset, float yoffset);
+	void processMouseScroll(float yoffset);
 
 private:
 	/*=== Object ===*/
@@ -25,14 +29,14 @@ private:
 
 	/*=== Camera ===*/
 	Camera _camera;
-	
+
 	/*=== Light ===*/
 	glm::vec3 _light_pos;
 	glm::vec3 _light_color;
 
 	/*=== Time ===*/
-	float _last_frame;
-	float _delta_time;
+	float _last_frame = 0.0f;
+	float _delta_time = 0.0f;
 
 	/*=== MVP ===*/
 	glm::mat4 _model, _view, _projection;
@@ -42,7 +46,7 @@ private:
 	std::shared_ptr<Shader> _global_shader;
 
 	void initPhysics();
-	void initObjects();
+	void initObjects();	
 };
 
 

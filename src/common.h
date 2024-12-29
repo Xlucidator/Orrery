@@ -15,5 +15,19 @@
 
 extern uint32_t viewport_width;
 extern uint32_t viewport_height;
+extern bool keyboard[128];
+
+using ResizeCB = void(*)(int, int);
+using KeyboardCB = void(*)(int, int, int, int);
+using MouseMoveCB = void(*)(double, double);
+using MouseScrollCB = void(*)(double);
+
+enum Movement {
+	FORWARD,
+	BACKWARD,
+	LEFT,
+	RIGHT
+};
+
 
 #endif // !COMMON_H
