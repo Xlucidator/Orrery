@@ -14,6 +14,7 @@ link_directories(
 	SYSTEM "${CMAKE_SOURCE_DIR}/thirdparty/lib"
 )
 
+# execute file
 aux_source_directory(. MAIN)
 file(GLOB_RECURSE SRC_INNER ${CMAKE_SOURCE_DIR}/src/*.cpp)
 message(STATUS "Source files: ${SRC_INNER}")
@@ -22,18 +23,16 @@ add_executable(EscapeDungeon
 	${MAIN} 
 	${SRC_INNER}
 )
-target_link_libraries(EscapeDungeon glfw3.lib assimp.lib)
+
+# libs
+file(GLOB LIBS "${CMAKE_SOURCE_DIR}/thirdparty/lib/*.lib")
+target_link_libraries(EscapeDungeon ${LIBS})
 
 # assets
-file(GLOB ASSETS "./assets")
+file(GLOB ASSETS "${CMAKE_SOURCE_DIR}/assets")
 file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
 
 # dlls
-file(GLOB DLLS "./thirdparty/lib/*.dll")
+file(GLOB DLLS "${CMAKE_SOURCE_DIR}/thirdparty/dll/*.dll")
 file(COPY ${DLLS} DESTINATION ${CMAKE_BINARY_DIR})
 
-# libs
-# file(GLOB LIBS "./libs/*.cpp")
-# add_library(EscapeDungeon STATIC ${LIBS})
-# target_include_directories(libs PUBLIC "./libs")
-# target_link_libraries(EscapeDungeon PRIVATE libs)

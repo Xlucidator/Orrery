@@ -1,0 +1,8 @@
+PhysX:
+ pvd not used
+ - dll: 'PVDRuntime_64.dll' maybe useless
+ - lib: 'PVDRuntime_64.dll' maybe useless
+ - had not implement: bin/win.x86_64.vc143.mt/release/*.pdb, pvdruntime/include/*.h
+
+GLFW:
+ glfw3.dll not used
