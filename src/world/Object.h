@@ -14,7 +14,7 @@ enum OBJType {
 
 class Object {
 public:
-	Object(std::shared_ptr<Model> model, std::shared_ptr<Shader> shader, glm::mat4 model_matrix = glm::mat4(1.0f));
+	Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 model_matrix = glm::mat4(1.0f));
 	~Object() = default;
 
 	void render(glm::vec3& view, glm::vec3& projection); // TODO

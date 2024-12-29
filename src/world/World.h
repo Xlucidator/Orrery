@@ -28,7 +28,7 @@ private:
 	
 	/*=== Light ===*/
 	glm::vec3 _light_pos;
-	glm::vec3 _light_color
+	glm::vec3 _light_color;
 
 	/*=== Time ===*/
 	float _last_frame;

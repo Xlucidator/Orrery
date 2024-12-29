@@ -10,7 +10,7 @@
 class Shader {
 public:
 	Shader(const char* vertex_path, const char* fragment_path);
-	~Shader();
+	~Shader() = default;
 
 	void begin(); // begin to use shader
 	void end();   // end to use shader

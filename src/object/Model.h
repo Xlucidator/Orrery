@@ -19,6 +19,7 @@ GLuint textureFromFile(const char* path, const std::string& directory, bool gamm
 class Model {
 public:
 	Model(std::string& path) { load(path); }
+	Model(std::string path) { load(path); }
 	~Model() {} 
 
 	void draw(Shader* shader);

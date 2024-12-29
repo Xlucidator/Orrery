@@ -3,7 +3,7 @@
 
 
 
-Object::Object(std::shared_ptr<Model> model, std::shared_ptr<Shader> shader, glm::mat4 model_matrix) {
+Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 model_matrix) {
 	_type = MODEL;
 	_model = model;
 	_shader = shader;
@@ -25,7 +25,7 @@ void Object::render(glm::vec3& view, glm::vec3& projection) {
 	//_shader->begin();
 
 	// TODO: whether to render here or out in the world
-	_model->draw(_shader);
+	_model->draw(_shader.get());
 
 	//_shader->end();
 }

@@ -15,18 +15,24 @@ link_directories(
 )
 
 # execute file
-aux_source_directory(. MAIN)
 file(GLOB_RECURSE SRC_INNER ${CMAKE_SOURCE_DIR}/src/*.cpp)
 message(STATUS "Source files: ${SRC_INNER}")
 
 add_executable(EscapeDungeon 
-	${MAIN} 
+	main.cpp 
+	glad.c
+	${SRC_INNER}
+)
+add_executable(AgedTest
+	main_deprecated.cpp 
+	glad.c
 	${SRC_INNER}
 )
 
 # libs
 file(GLOB LIBS "${CMAKE_SOURCE_DIR}/thirdparty/lib/*.lib")
 target_link_libraries(EscapeDungeon ${LIBS})
+target_link_libraries(AgedTest ${LIBS})
 
 # assets
 file(GLOB ASSETS "${CMAKE_SOURCE_DIR}/assets")

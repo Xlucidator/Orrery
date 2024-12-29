@@ -63,9 +63,9 @@ Shader::Shader(const char* vertex_path, const char* fragment_path) {
     glDeleteShader(fragment_shader);
 }
 
-Shader::~Shader() {
-
-}
+//Shader::~Shader() {
+//
+//}
 
 
 /* Main Operation */
