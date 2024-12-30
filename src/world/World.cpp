@@ -60,13 +60,18 @@ void World::initObjects() {
 		"assets/shaders/loadobj_nolight.vert", 
 		"assets/shaders/loadobj_nolight.frag"
 	);
-	auto backpack = std::make_shared<Model>("assets/objects/backpack/backpack.obj");
+	//auto backpack = std::make_shared<Model>("assets/objects/backpack/backpack.obj");
+	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");
 
 	// Create Objects
 	glm::mat4 model;
-	glm::vec3 location = glm::vec3(2.0f, 5.0f, -15.0f);
-	_objects.emplace_back(_global_shader, backpack);
-	_objects.emplace_back(_global_shader, backpack, glm::translate(model, location));
+	glm::vec3 location[] = { 
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(3.0f, 0.0f, -4.0f),
+		glm::vec3(2.0f, 0.0f, -6.0f),
+	};
+	_objects.emplace_back(_global_shader, barrel, glm::translate(model, location[0]));
+	_objects.emplace_back(_global_shader, barrel, glm::translate(model, location[1]));
 }
 
 void World::initPhysics() {
@@ -78,16 +83,16 @@ void World::initPhysics() {
 	if (!mFoundation) throw("PxCreateFoundation failed!");
 
 	// Create PVD
-	mPvd = PxCreatePvd(*mFoundation);
-	physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
-	mPvd->connect(*transport, physx::PxPvdInstrumentationFlag::eALL);
+	//mPvd = PxCreatePvd(*mFoundation);
+	//physx::PxPvdTransport* transport = physx::PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
+	//mPvd->connect(*transport, physx::PxPvdInstrumentationFlag::eALL);
 
 	// Creat Physics with Tolerance Scale
 	// mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true, mPvd); // Without
 	mToleranceScale.length = 100; // typical length of an object
 	mToleranceScale.speed = 981; // typical speed of an object, gravity*1s is a reasonable choice
-	mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, mToleranceScale, true, mPvd);
-	// mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, mToleranceScale); // do not use PVD
+	// mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, mToleranceScale, true, mPvd);
+	mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, mToleranceScale); // do not use PVD
 
 	// Creat SceneDesc
 	physx::PxSceneDesc scene_desc(mPhysics->getTolerancesScale());

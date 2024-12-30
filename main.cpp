@@ -35,7 +35,7 @@ int main() {
     /* Set Callback Monitor */
     APP->setResizeCallback(onResize);
     APP->setKeyboardCallback(onKeyChange);
-	APP->setMouseMoveCallback(onMouseMove);
+    APP->setMouseMoveCallback(onMouseMove);
     APP->setMouseScrollCallback(onMouseScroll);
    
     /* Window Loop */

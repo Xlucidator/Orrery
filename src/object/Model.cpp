@@ -15,7 +15,7 @@ void Model::draw(Shader* shader) {
 }
 
 void Model::load(std::string& path) {
-	stbi_set_flip_vertically_on_load(true); // reverse texture picture y axis
+	//stbi_set_flip_vertically_on_load(true); // reverse texture picture y axis
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs/* | aiProcess_GenNormals*/);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {

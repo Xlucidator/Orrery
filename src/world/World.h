@@ -57,9 +57,9 @@ private:
 	
 	physx::PxScene*					mScene = nullptr;
 	physx::PxMaterial*				mMaterial = nullptr;
-	physx::PxCooking*				mCooking = nullptr;
+	//physx::PxCooking*				mCooking = nullptr;
 	
-	physx::PxPvd*					mPvd = nullptr;
+	//physx::PxPvd*					mPvd = nullptr;
 
 	void initPhysics();
 	void initObjects();	
