@@ -18,11 +18,14 @@ GLuint textureFromFile(const char* path, const std::string& directory, bool gamm
 
 class Model {
 public:
-	Model(std::string& path) { load(path); }
 	Model(std::string path) { load(path); }
-	~Model() {} 
+	~Model() = default;
 
 	void draw(Shader* shader);
+
+	/* Physics */
+	std::vector<physx::PxVec3> px_combined_vertices;
+	std::vector<physx::PxU32>  px_combined_indices;
 
 private:
 	std::vector<Mesh> meshes;
@@ -33,6 +36,9 @@ private:
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene); // TODO: maybe std::move && would better?
 	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string type_name);
+
+	/* Physics */
+	void setPxCombinedMesh();
 };
 
 

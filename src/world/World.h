@@ -12,7 +12,14 @@
 class World {
 public:
 	World();
-	~World() = default;
+	~World() {
+		if (mCookingParams) delete mCookingParams;
+		if (mMaterial) mMaterial->release();
+		if (mScene) mScene->release();
+		if (mPhysics) mPhysics->release();
+		if (mFoundation) mFoundation->release();
+		if (mDispatcher) mDispatcher->release();
+	}
 
 	void init();
 	void update();
@@ -57,12 +64,12 @@ private:
 	
 	physx::PxScene*					mScene = nullptr;
 	physx::PxMaterial*				mMaterial = nullptr;
-	//physx::PxCooking*				mCooking = nullptr;
+	physx::PxCookingParams*			mCookingParams = nullptr;  // no more PxCooking
 	
 	//physx::PxPvd*					mPvd = nullptr;
 
 	void initPhysics();
-	void initObjects();	
+	void initObjects();
 };
 
 

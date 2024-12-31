@@ -8,6 +8,45 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+
+GLuint textureFromFile(const char* path, const std::string& directory, bool gamma) {
+	std::string filename = std::string(path);
+	filename = directory + '/' + filename;
+
+	/* Init Texture Object: texture_id */
+	GLuint texture_id;
+	glGenTextures(1, &texture_id);
+
+	/* Loaded Texture Picture */
+	int width, height, component_num;
+	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &component_num, 0);
+	if (!data) { // loaded failed
+		std::cout << "Failed to load texture at path: " << path << std::endl;
+		stbi_image_free(data);
+		return texture_id;
+	}
+
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+
+	/* Send Data to Texture Object */
+	GLenum format = (component_num == 1) ? GL_RED : (component_num == 3 ? GL_RGB : GL_RGBA);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	/* Texture Filtering Settings */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	/* Mipmap Settings */
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_image_free(data);
+
+	return texture_id;
+}
+
+
 void Model::draw(Shader* shader) {
 	for (int i = 0; i < meshes.size(); i++) {
 		meshes[i].draw(shader);
@@ -24,6 +63,9 @@ void Model::load(std::string& path) {
 	}
 	directory = path.substr(0, path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
+
+	// prepare data for PhysX
+	setPxCombinedMesh();
 }
 
 
@@ -110,39 +152,19 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 	return textures;
 }
 
-GLuint textureFromFile(const char* path, const std::string& directory, bool gamma) {
-	std::string filename = std::string(path);
-	filename = directory + '/' + filename;
 
-	/* Init Texture Object: texture_id */
-	GLuint texture_id;
-	glGenTextures(1, &texture_id);
 
-	/* Loaded Texture Picture */
-	int width, height, component_num;
-	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &component_num, 0);
-	if (!data) { // loaded failed
-		std::cout << "Failed to load texture at path: " << path << std::endl;
-		stbi_image_free(data);
-		return texture_id;
+void Model::setPxCombinedMesh() {
+	size_t vertex_offset = 0;
+	for (const auto& mesh : meshes) {
+		for (const auto& vertex : mesh.vertices) {
+			px_combined_vertices.emplace_back(
+				physx::PxVec3(vertex.position.x, vertex.position.y, vertex.position.z)
+			);
+		}
+		// combine indices: need to offset
+		for (const auto& index : mesh.indices) {
+			px_combined_indices.push_back(static_cast<physx::PxU32>(index + vertex_offset));
+		}
 	}
-
-	glBindTexture(GL_TEXTURE_2D, texture_id);
-	
-	/* Send Data to Texture Object */
-	GLenum format = (component_num == 1) ? GL_RED : (component_num == 3 ? GL_RGB : GL_RGBA);
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	/* Texture Filtering Settings */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	
-	/* Mipmap Settings */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	
-	stbi_image_free(data);
-
-	return texture_id;
 }

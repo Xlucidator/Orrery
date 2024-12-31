@@ -16,6 +16,7 @@ World::World() {
 }
 
 void World::init() {
+	initPhysics();
 	initObjects();
 }
 
@@ -27,6 +28,13 @@ void World::update() {
 
 	/* React to Input */
 	processKeyboardInput();
+
+	/* Get Physcs Simulation */
+	mScene->simulate(_delta_time);
+	mScene->fetchResults(true);
+	for (auto& obj : _objects) {
+		obj.updateSimulateResult();
+	}
 }
 
 void World::render() {
@@ -62,16 +70,21 @@ void World::initObjects() {
 	);
 	//auto backpack = std::make_shared<Model>("assets/objects/backpack/backpack.obj");
 	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");
+	//auto barrelpacks = std::make_shared<Model>("assets/objects/barrelpacks/barrels_packed.obj");
 
 	// Create Objects
 	glm::mat4 model;
 	glm::vec3 location[] = { 
-		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, 10.0f, 0.0f),
 		glm::vec3(3.0f, 0.0f, -4.0f),
 		glm::vec3(2.0f, 0.0f, -6.0f),
 	};
 	_objects.emplace_back(_global_shader, barrel, glm::translate(model, location[0]));
-	_objects.emplace_back(_global_shader, barrel, glm::translate(model, location[1]));
+	//_objects.emplace_back(_global_shader, barrelpacks, glm::translate(model, location[1]));
+
+	// init Objects Physics
+	auto barrel_actor = _objects[0].createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
+	mScene->addActor(*barrel_actor);
 }
 
 void World::initPhysics() {
@@ -94,6 +107,10 @@ void World::initPhysics() {
 	// mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, mToleranceScale, true, mPvd);
 	mPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, mToleranceScale); // do not use PVD
 
+	// Init PxCooking
+	mCookingParams = new physx::PxCookingParams(mPhysics->getTolerancesScale());
+	// mCookingParams->meshPreprocessParams |= physx::PxMeshPreprocessingFlag::eWELD_VERTICES
+
 	// Creat SceneDesc
 	physx::PxSceneDesc scene_desc(mPhysics->getTolerancesScale());
 	scene_desc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
@@ -107,12 +124,12 @@ void World::initPhysics() {
 	mScene = mPhysics->createScene(scene_desc);
 
 	// Pvd Client
-	physx::PxPvdSceneClient* pvd_client = mScene->getScenePvdClient();
-	if (pvd_client) {
-		pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
-		pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
-		pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
-	}
+	//physx::PxPvdSceneClient* pvd_client = mScene->getScenePvdClient();
+	//if (pvd_client) {
+	//	pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+	//	pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+	//	pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+	//}
 
 	/* Create Simulation */
 	mMaterial = mPhysics->createMaterial(0.5f, 0.5f, 0.6f); // static friction, dynamic friction, restitution

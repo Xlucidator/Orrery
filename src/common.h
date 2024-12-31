@@ -31,5 +31,13 @@ enum Movement {
 	RIGHT
 };
 
+enum PXType {
+	NONE = 0,	// have not allocated
+	STATIC,		// PxRigidStatic
+	DYNAMIC,	// PxRigidBody - PxRigidDynamic
+	ARTLINK		// PxRigidBody - PxArticulationLink
+};
+
+//using namespace physx;
 
 #endif // !COMMON_H
