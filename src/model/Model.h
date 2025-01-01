@@ -10,11 +10,6 @@
 #include <vector>
 #include <map>
 
-struct aiScene;
-struct aiNode;
-struct aiMesh;
-struct aiMaterial;
-enum aiTextureType;
 
 GLuint textureFromFile(const char* path, const std::string& directory, bool gamma = false);
 

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ASSIMP2GLM_H
+#define ASSIMP2GLM_H
 
 #include<assimp/quaternion.h>
 #include<assimp/vector3.h>
@@ -30,3 +31,5 @@ public:
 		return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
 	}
 };
+
+#endif
