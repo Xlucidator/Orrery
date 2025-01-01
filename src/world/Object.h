@@ -4,6 +4,7 @@
 #include "common.h"
 #include "shader/Shader.h"
 #include "model/Model.h"
+#include "animation/Animator.h"
 
 #include <string>
 
@@ -23,6 +24,7 @@ public:
 
 	void render(glm::vec3& view, glm::vec3& projection); // TODO: whether render here or out
 	void draw(std::shared_ptr<Shader>& shader);
+	//void update();
 
 	void setModelMatrix(glm::mat4 model) { 
 		_model_matrix = model;
@@ -48,7 +50,9 @@ public:
 	void setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value); // TODO: more clear
 	void updateSimulateResult();
 
-	/* Animation */
+	/* Animator: Drive Animation */
+	bool has_animator = false;
+	std::shared_ptr<Animator> animator = nullptr;
 
 private:
 	OBJType _type;

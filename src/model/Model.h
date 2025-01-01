@@ -13,6 +13,8 @@
 
 GLuint textureFromFile(const char* path, const std::string& directory, bool gamma = false);
 
+class Animation;
+
 class Model {
 public:
 	Model(std::string path) { load(path); }
@@ -27,6 +29,10 @@ public:
 	/* Physics */
 	std::vector<physx::PxVec3> px_combined_vertices;
 	std::vector<physx::PxU32>  px_combined_indices;
+
+	/* Animation */
+	bool has_animation = false;
+	std::shared_ptr<Animation> animation = nullptr;
 
 private:
 	std::vector<Mesh> _meshes;

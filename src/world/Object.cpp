@@ -17,11 +17,11 @@ Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm
 	//rotate_mat = glm::normalize(rotate_mat);
 	_rotation = glm::quat_cast(rotate_mat);
 	
-	// for px: TODO not here
-	//_px_transform = physx::PxTransform(
-	//	physx::PxVec3(_position.x, _position.y, _position.z),
-	//	physx::PxQuat(_rotation.x, _rotation.y, _rotation.z, _rotation.w)
-	//);
+	// Set Animator
+	if (model->has_animation) {
+		animator = std::make_shared<Animator>(model->animation);
+		has_animator = true;
+	}
 }
 
 

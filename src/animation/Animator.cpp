@@ -4,7 +4,7 @@
 
 #include <cmath>
 
-Animator::Animator(Animation* animation) {
+Animator::Animator(std::shared_ptr<Animation> animation) {
 	_current_time = 0.0f;
 	_current_animation = animation;
 	
@@ -14,7 +14,7 @@ Animator::Animator(Animation* animation) {
 	}
 }
 
-void Animator::init(Animation* played_animation) {
+void Animator::init(std::shared_ptr<Animation> played_animation) {
 	_current_animation = played_animation;
 	_current_time = 0.0f;
 }

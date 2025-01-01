@@ -1,5 +1,6 @@
 
 #include "Model.h"
+#include "animation/Animation.h"
 #include "assimp2glm.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -63,8 +64,14 @@ void Model::load(std::string& path) {
 	_directory = path.substr(0, path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
 
-	// prepare data for PhysX
+	// Prepare data for PhysX
 	setPxCombinedMesh();
+
+	// Prepare Animation
+	if (scene->HasAnimations()) {
+		animation = std::make_shared<Animation>(scene, *this);
+		has_animation = true;
+	}
 }
 
 

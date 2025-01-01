@@ -18,6 +18,15 @@ Animation::Animation(const std::string& animation_path, Model& model) {
     readBonesInvolved(animation, model);
 }
 
+Animation::Animation(const aiScene* scene, Model& model) {
+    // Get Animation Data
+    aiAnimation* animation = scene->mAnimations[0];
+    _duration = animation->mDuration;
+    _ticks_per_second = animation->mTicksPerSecond;
+    _root = traverseAiNodeRecursive(scene->mRootNode); // TODO: also silly, can mixed in Model
+    readBonesInvolved(animation, model);
+}
+
 Bone* Animation::findBone(const std::string& name) {
     auto it = std::find_if(_bones.begin(), _bones.end(), [&](const Bone& bone) {
         return bone.getBoneName() == name;

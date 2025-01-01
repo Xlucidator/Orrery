@@ -31,6 +31,13 @@ void World::update() {
 	/* React to Input */
 	processKeyboardInput();
 
+	/* Animate */
+	for (auto& obj : _objects) {
+		if (obj.has_animator) {
+			obj.animator->update(_delta_time);
+		}
+	}
+
 	/* Get Physcs Simulation */
 #ifdef PHYSIC_IMPL
 	if (mScene) {

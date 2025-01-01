@@ -11,10 +11,10 @@
 
 class Animator {
 public:
-	Animator(Animation* animation);
+	Animator(std::shared_ptr<Animation> animation);
 	~Animator() = default;
 
-	void init(Animation* played_animation);
+	void init(std::shared_ptr<Animation> played_animation);
 	void update(float delta_time);
 	
 
@@ -24,7 +24,7 @@ public:
 
 private:
 	std::vector<glm::mat4> _final_bone_matrices;
-	Animation* _current_animation;
+	std::shared_ptr<Animation> _current_animation = nullptr;
 	float _current_time = 0.0f;
 	float _delta_time = 0.0f;
 };
