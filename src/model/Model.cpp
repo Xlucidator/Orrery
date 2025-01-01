@@ -1,5 +1,6 @@
 
 #include "Model.h"
+#include "assimp2glm.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -7,6 +8,8 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#include <assert.h>
 
 
 GLuint textureFromFile(const char* path, const std::string& directory, bool gamma) {
@@ -48,8 +51,8 @@ GLuint textureFromFile(const char* path, const std::string& directory, bool gamm
 
 
 void Model::draw(Shader* shader) {
-	for (int i = 0; i < meshes.size(); i++) {
-		meshes[i].draw(shader);
+	for (int i = 0; i < _meshes.size(); i++) {
+		_meshes[i].draw(shader);
 	}
 }
 
@@ -61,7 +64,7 @@ void Model::load(std::string& path) {
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
-	directory = path.substr(0, path.find_last_of('/'));
+	_directory = path.substr(0, path.find_last_of('/'));
 	processNode(scene->mRootNode, scene);
 
 	// prepare data for PhysX
@@ -74,7 +77,7 @@ void Model::load(std::string& path) {
 void Model::processNode(aiNode* node, const aiScene* scene) {
 	for (int i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.emplace_back(processMesh(mesh, scene));
+		_meshes.emplace_back(processMesh(mesh, scene));
 	}
 	for (int i = 0; i < node->mNumChildren; i++) {
 		processNode(node->mChildren[i], scene);
@@ -89,9 +92,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	/* Get Vertices */
 	for (int i = 0; i < mesh->mNumVertices; i++) {
 		Vertex vertex;
-		vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertex.position = AssimpGLMHelpers::toGLMVec3(mesh->mVertices[i]);
 		vertex.normal = (mesh->HasNormals()) ?  // notice: could have no normals (currently)
-			glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z) : glm::vec3(0.0f);
+			AssimpGLMHelpers::toGLMVec3(mesh->mNormals[i]) : glm::vec3(0.0f);
 		vertex.texcoord = (mesh->mTextureCoords[0]) ?
 			glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y) : glm::vec2(0.0f);
 		vertices.push_back(vertex);
@@ -122,6 +125,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.insert(textures.end(), normal_maps.begin(), normal_maps.end());
 	}
 
+	/* Get Bone Info */
+	extractBoneWeightForVertices(vertices, mesh, scene);
+
 	return Mesh(vertices, indices, textures);
 }
 
@@ -135,10 +141,10 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		mat->GetTexture(type, i, &str); // get texture path -> str
 
 		skip = false;
-		for (int j = 0; j < textures_loaded.size(); j++) {
+		for (int j = 0; j < _textures_loaded.size(); j++) {
 			// simple compare
-			if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0) {
-				textures.push_back(textures_loaded[j]);
+			if (std::strcmp(_textures_loaded[j].path.data(), str.C_Str()) == 0) {
+				textures.push_back(_textures_loaded[j]);
 				skip = true; // path is the same, so this one has loaded yet -> skip
 				break;
 			}
@@ -146,20 +152,21 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		if (skip) continue;
 
 		Texture texture;
-		texture.id = textureFromFile(str.C_Str(), directory);
+		texture.id = textureFromFile(str.C_Str(), _directory);
 		texture.type = type_name;
 		texture.path = str.C_Str();
 		textures.push_back(texture);
-		textures_loaded.push_back(texture);
+		_textures_loaded.push_back(texture);
 	}
 	return textures;
 }
 
 
 
+/* Physics */
 void Model::setPxCombinedMesh() {
 	size_t vertex_offset = 0;
-	for (const auto& mesh : meshes) {
+	for (const auto& mesh : _meshes) {
 		for (const auto& vertex : mesh.vertices) {
 			px_combined_vertices.emplace_back(
 				physx::PxVec3(vertex.position.x, vertex.position.y, vertex.position.z)
@@ -168,6 +175,49 @@ void Model::setPxCombinedMesh() {
 		// combine indices: need to offset
 		for (const auto& index : mesh.indices) {
 			px_combined_indices.push_back(static_cast<physx::PxU32>(index + vertex_offset));
+		}
+	}
+}
+
+
+/* Bone */
+void Model::extractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene) {
+	
+	for (int bone_index = 0; bone_index < mesh->mNumBones; bone_index++) {
+		int bone_id = -1;
+		std::string bone_name(mesh->mBones[bone_index]->mName.data);
+
+		// Find & Create Bone (with bone name) in _bone_info_map
+		if (_bone_info_map.find(bone_name) == _bone_info_map.end()) { // new one
+			glm::mat4 offset_mat = AssimpGLMHelpers::toGLMMat4(mesh->mBones[bone_index]->mOffsetMatrix);
+
+			BoneInfo new_bone_info(_bone_cnt, offset_mat);
+			bone_id = _bone_cnt++;
+
+			_bone_info_map[bone_name] = new_bone_info;
+		} else { // old one
+			bone_id = _bone_info_map[bone_name].id;
+		}
+
+		// Gather Bone Info into Corresponding Vertex
+		auto weights = mesh->mBones[bone_index]->mWeights;
+		int weight_num = mesh->mBones[bone_index]->mNumWeights;
+		for (int weight_index = 0; weight_index < weight_num; weight_index++) {
+			int vertex_id = weights[weight_index].mVertexId;
+			float weight = weights[weight_index].mWeight;
+			assert(vertex_id <= vertices.size());
+			setVertexBoneData(vertices[vertex_id], bone_id, weight);
+		}
+	}
+}
+
+// TODO: implement here or in Vertex struct
+void Model::setVertexBoneData(Vertex& vertex, int boneid, float weight) {
+	for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
+		if (vertex.bone_ids[i] < 0) {
+			vertex.weights[i] = weight;
+			vertex.bone_ids[i] = boneid;
+			break;
 		}
 	}
 }
