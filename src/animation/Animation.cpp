@@ -11,12 +11,11 @@ Animation::Animation(const std::string& animation_path, Model& model) {
     assert(scene && scene->mRootNode);
 
     // Get Animation Data
-    auto animation = scene->mAnimations[0];
+    aiAnimation* animation = scene->mAnimations[0];
     _duration = animation->mDuration;
     _ticks_per_second = animation->mTicksPerSecond;
-    // readHeirarchyData(_root, scene->mRootNode);
     _root = traverseAiNodeRecursive(scene->mRootNode);
-    readMissingBones(animation, model);
+    readBonesInvolved(animation, model);
 }
 
 Bone* Animation::findBone(const std::string& name) {
@@ -40,16 +39,16 @@ AssimpNodeData Animation::traverseAiNodeRecursive(const aiNode* src) {
     return new_node;
 }
 
-void Animation::readMissingBones(const aiAnimation* animation, Model& model) {
+void Animation::readBonesInvolved(const aiAnimation* animation, Model& model) {
     auto& boneinfo_map = model.getBoneInfoMap();
     int& bone_cnt = model.getBoneCnt();
 
-    //reading channels(bones engaged in an animation and their keyframes)
+    // Get Bones that are Engaged in the Animation
     int size = animation->mNumChannels;
     for (int i = 0; i < size; i++) {
         auto channel = animation->mChannels[i];
         std::string bone_name = channel->mNodeName.data;
-        // Add new bone from animation, as the bone can be missing in the model's processs
+        // Also, add new boneinfo, for it could be missed in Model's meshprocessing
         if (boneinfo_map.find(bone_name) == boneinfo_map.end()) {
             boneinfo_map[bone_name].id = bone_cnt;
             bone_cnt++;

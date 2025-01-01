@@ -11,14 +11,14 @@
 
 struct AssimpNodeData {
 	std::string name;
-	glm::mat4 transformation;
+	glm::mat4 transform;
 	
 	std::vector<AssimpNodeData> children;
-	int child_num;
+	int child_num = 0;
 
 	AssimpNodeData() = default;
 	AssimpNodeData(const std::string& name, const glm::mat4& transform, int child_num)
-		:transformation(transform), name(name), child_num(child_num) {}
+		:transform(transform), name(name), child_num(child_num) {}
 };
 
 
@@ -33,18 +33,17 @@ public:
 	inline float getDuration() { return _duration; }
 	inline float getTicksPerSecond() { return _ticks_per_second; }
 	inline const auto& getRootNode() { return _root; }
-	inline const auto& GetBoneIDMap() { return _boneinfo_map; }
+	inline const auto& getBoneInfoMap() { return _boneinfo_map; }
 
 private:
 	float _duration;
 	int _ticks_per_second;
-	std::vector<Bone> _bones;
-	AssimpNodeData _root;
+	std::vector<Bone> _bones; // bones that are engaged in the animation
+	AssimpNodeData _root; // TODO: maybe pointer is better, but be careful about memory leak
 	std::map<std::string, BoneInfo> _boneinfo_map;
 
-	//void readHierarchyData(AssimpNodeData& dest, const aiNode* src);
 	AssimpNodeData traverseAiNodeRecursive(const aiNode* src);
-	void readMissingBones(const aiAnimation* animation, Model& model);
+	void readBonesInvolved(const aiAnimation* animation, Model& model);
 };
 
 #endif // !ANIMATION_H
