@@ -33,9 +33,7 @@ void World::update() {
 
 	/* Animate */
 	for (auto& obj : _objects) {
-		if (obj.has_animator) {
-			obj.animator->update(_delta_time);
-		}
+		obj.animator->update(_delta_time);
 	}
 
 	/* Get Physcs Simulation */
@@ -65,8 +63,8 @@ void World::render() {
 	_global_shader->setMat4f("view", glm::value_ptr(_view));
 	_global_shader->setMat4f("projection", glm::value_ptr(_projection));
 	for (auto& obj : _objects) {
-		_model = obj.getModelMatrix();
-		_global_shader->setMat4f("model", glm::value_ptr(_model));
+		//_model = obj.getModelMatrix();
+		//_global_shader->setMat4f("model", glm::value_ptr(_model));
 		//_norm_model = obj.getNormModelMatrix();
 		//_global_shader->setMat4f("normModel", glm::value_ptr(_norm_model));
 		obj.draw(_global_shader);

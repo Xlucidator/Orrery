@@ -24,7 +24,7 @@ public:
 
 	void render(glm::vec3& view, glm::vec3& projection); // TODO: whether render here or out
 	void draw(std::shared_ptr<Shader>& shader);
-	//void update();
+	void update(std::shared_ptr<Shader>& shader);
 
 	void setModelMatrix(glm::mat4 model) { 
 		_model_matrix = model;
@@ -51,7 +51,6 @@ public:
 	void updateSimulateResult();
 
 	/* Animator: Drive Animation */
-	bool has_animator = false;
 	std::shared_ptr<Animator> animator = nullptr;
 
 private:

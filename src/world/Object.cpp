@@ -1,7 +1,7 @@
 
 #include "Object.h"
 
-
+#include <vector>
 
 Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 model_matrix) {
 	_type = MODEL;
@@ -18,15 +18,26 @@ Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm
 	_rotation = glm::quat_cast(rotate_mat);
 	
 	// Set Animator
-	if (model->has_animation) {
-		animator = std::make_shared<Animator>(model->animation);
-		has_animator = true;
-	}
+	animator = std::make_shared<Animator>(model->animation);
 }
 
 
 void Object::draw(std::shared_ptr<Shader>& shader) {
+	/* Implement Model Matrix(&Normal Model Matrix) */
+	shader->setMat4f("model", glm::value_ptr(_model_matrix));
+	//shader->setMat4f("normModel", glm::value_ptr(_norm_model_matrix));
+
+	/* Implement Animation Bone Matrices */
+	const std::vector<glm::mat4>& bone_transforms = animator->getFinalBoneMatrices();
+	for (int i = 0; i < bone_transforms.size(); ++i) {
+		shader->setMat4f("finalBonesMatrices[" + std::to_string(i) + "]", glm::value_ptr(bone_transforms[i]));
+	}
+
 	_model->draw(shader.get());
+}
+
+void Object::update(std::shared_ptr<Shader>& shader) {
+
 }
 
 void Object::render(glm::vec3& view, glm::vec3& projection) { // DO NOT USE
