@@ -48,6 +48,8 @@ public:
 	void setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value); // TODO: more clear
 	void updateSimulateResult();
 
+	/* Animation */
+
 private:
 	OBJType _type;
 	std::shared_ptr<Shader> _shader = nullptr; // shared

@@ -32,5 +32,9 @@ void check_error();
 
 //physx::PxTransform
 
+glm::mat4 createModelMatrix(const glm::vec3 & position, const glm::vec3 & scale = glm::vec3(1.0f));
+//inline glm::mat4 createModelMatrix(const glm::vec3 & position, const glm::vec3 & rotation, const glm::vec3 & scale = glm::vec3(1.0f));
+glm::mat4 createModelMatrix(const glm::vec3 & position, const glm::quat & rotation, const glm::vec3 & scale = glm::vec3(1.0f));
+
 
 #endif // !UTILS_H

@@ -8,7 +8,7 @@ World::World() {
 	_delta_time = 0.0f;
 
 	/* Init Camera */
-	_camera = Camera(glm::vec3(0.0f, 0.0f, 5.0f));
+	_camera = Camera(glm::vec3(0.0f, 0.0f, 10.0f));
 
 	/* Init Light */
 	_light_pos = glm::vec3(1.2f, 1.0f, 2.0f);
@@ -78,17 +78,20 @@ void World::initObjects() {
 	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");
 	auto box = std::make_shared<Model>("assets/objects/box/box_resize.obj");
 	auto barrels = std::make_shared<Model>("assets/objects/barrelpack/barrels_packed.obj");
+	auto vampire = std::make_shared<Model>("assets/objects/vampire/dancing_vampire.dae");
 
 	// Create Objects
-	glm::mat4 model;
-	glm::vec3 location[] = { 
-		glm::vec3(-1.0f, 0.0f, 0.0f),
-		glm::vec3(3.0f, 0.0f, -4.0f),
-		glm::vec3(2.0f, 0.0f, -6.0f),
+	glm::mat4 model_transform[] = {
+		// Location					 // Scale
+		createModelMatrix(glm::vec3(-1.0f, 0.0f, 0.0f)),
+		createModelMatrix(glm::vec3(3.0f, 0.0f, -4.0f)),
+		createModelMatrix(glm::vec3(2.0f, 0.0f, -6.0f)),
+		createModelMatrix(glm::vec3(-2.0f, 0.0f, -1.0f), glm::vec3(0.02f))
 	};
-	_objects.emplace_back(_global_shader, barrel, glm::translate(model, location[0]));
-	_objects.emplace_back(_global_shader, box, glm::translate(model, location[1]));
-	_objects.emplace_back(_global_shader, barrels, glm::translate(model, location[2]));
+	_objects.emplace_back(_global_shader, barrel, model_transform[0]);
+	_objects.emplace_back(_global_shader, box   , model_transform[1]);
+	_objects.emplace_back(_global_shader, barrels, model_transform[2]);
+	_objects.emplace_back(_global_shader, vampire, model_transform[3]);
 
 	// init Objects Physics
 #ifdef PHYSIC_IMPL

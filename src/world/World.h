@@ -6,6 +6,8 @@
 #include "camera/Camera.h"
 #include "shader/Shader.h"
 #include "model/Model.h"
+#include "animation/Animator.h"
+#include "animation/Animation.h"
 
 #include <vector>
 

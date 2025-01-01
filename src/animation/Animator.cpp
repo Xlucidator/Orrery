@@ -29,7 +29,7 @@ void Animator::update(float delta_time) {
 }
 
 void Animator::calculateBoneTransformRecursive(const AssimpNodeData* node, glm::mat4 parent_transform) {
-	std::string& node_name = node->name;
+	const std::string& node_name = node->name;
 	glm::mat4 node_transform = node->transform; // init
 
 	// Search for Bones Involved and Exert Transformation
@@ -45,7 +45,7 @@ void Animator::calculateBoneTransformRecursive(const AssimpNodeData* node, glm::
 	auto& boneinfo_map = _current_animation->getBoneInfoMap();
 	auto it = boneinfo_map.find(node_name);
 	if (it != boneinfo_map.end()) {
-		BoneInfo& boneinfo = it->second;
+		const BoneInfo& boneinfo = it->second;
 		_final_bone_matrices[boneinfo.id] = global_transform * boneinfo.offset;
 	}
 
