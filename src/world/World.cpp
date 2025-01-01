@@ -16,7 +16,9 @@ World::World() {
 }
 
 void World::init() {
+#ifdef PHYSIC_IMPL
 	initPhysics();
+#endif
 	initObjects();
 }
 
@@ -30,11 +32,15 @@ void World::update() {
 	processKeyboardInput();
 
 	/* Get Physcs Simulation */
-	mScene->simulate(_delta_time);
-	mScene->fetchResults(true);
-	for (auto& obj : _objects) {
-		obj.updateSimulateResult();
+#ifdef PHYSIC_IMPL
+	if (mScene) {
+		mScene->simulate(_delta_time);
+		mScene->fetchResults(true);
+		for (auto& obj : _objects) {
+			obj.updateSimulateResult();
+		}
 	}
+#endif
 }
 
 void World::render() {
@@ -70,21 +76,25 @@ void World::initObjects() {
 	);
 	//auto backpack = std::make_shared<Model>("assets/objects/backpack/backpack.obj");
 	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");
-	//auto barrelpacks = std::make_shared<Model>("assets/objects/barrelpacks/barrels_packed.obj");
+	auto box = std::make_shared<Model>("assets/objects/box/box_resize.obj");
+	auto barrels = std::make_shared<Model>("assets/objects/barrelpack/barrels_packed.obj");
 
 	// Create Objects
 	glm::mat4 model;
 	glm::vec3 location[] = { 
-		glm::vec3(-1.0f, 10.0f, 0.0f),
+		glm::vec3(-1.0f, 0.0f, 0.0f),
 		glm::vec3(3.0f, 0.0f, -4.0f),
 		glm::vec3(2.0f, 0.0f, -6.0f),
 	};
 	_objects.emplace_back(_global_shader, barrel, glm::translate(model, location[0]));
-	//_objects.emplace_back(_global_shader, barrelpacks, glm::translate(model, location[1]));
+	_objects.emplace_back(_global_shader, box, glm::translate(model, location[1]));
+	_objects.emplace_back(_global_shader, barrels, glm::translate(model, location[2]));
 
 	// init Objects Physics
+#ifdef PHYSIC_IMPL
 	auto barrel_actor = _objects[0].createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
 	mScene->addActor(*barrel_actor);
+#endif
 }
 
 void World::initPhysics() {

@@ -3,7 +3,7 @@
 
 #include "common.h"
 #include "shader/Shader.h"
-#include "object/Model.h"
+#include "model/Model.h"
 
 #include <string>
 

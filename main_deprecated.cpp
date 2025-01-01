@@ -8,7 +8,7 @@
 #include "application/Application.h"
 #include "shader/Shader.h"
 #include "camera/Camera.h"
-#include "object/Model.h"
+#include "model/Model.h"
 
 
 /*=== Application settings ===*/

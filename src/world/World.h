@@ -5,7 +5,7 @@
 #include "world/Object.h"
 #include "camera/Camera.h"
 #include "shader/Shader.h"
-#include "object/Model.h"
+#include "model/Model.h"
 
 #include <vector>
 
