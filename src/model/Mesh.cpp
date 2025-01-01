@@ -70,6 +70,6 @@ void Mesh::setup() {
 		GL_CALL(glVertexAttribIPointer(3, MAX_BONE_INFLUENCE, GL_INT, sizeof(Vertex), (void*)offsetof(Vertex, bone_ids)));
 		// bone weight
 		GL_CALL(glEnableVertexAttribArray(4));
-		GL_CALL(glVertexAttribPointer(3, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weights)));
+		GL_CALL(glVertexAttribPointer(4, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weights)));
 	});
 }
