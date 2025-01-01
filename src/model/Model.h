@@ -4,7 +4,7 @@
 #include "common.h"
 #include "Mesh.h"
 #include "shader/Shader.h"
-#include "animation/animdata.h"
+#include "Bone.h"
 
 #include <string>
 #include <vector>

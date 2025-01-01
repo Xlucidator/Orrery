@@ -28,9 +28,10 @@ public:
 	~Bone() = default;
 
 	void update(float animation_time);
-	glm::mat4 getLocalTransform() { return _local_transform; }
-	std::string getBoneName() { return _name; }
-	int getBoneId() { return _id; }
+
+	glm::mat4 getLocalTransform() const { return _local_transform; }
+	std::string getBoneName() const { return _name; }
+	int getBoneId() const { return _id; }
 
 	int getPositionIndex(float animation_time) {
 		for (int i = 0; i < _pos_num - 1; i++)
@@ -59,6 +60,15 @@ private:
 	glm::mat4 interpolatePosition(float animation_time);
 	glm::mat4 interpolateRotation(float animation_time);
 	glm::mat4 interpolateScaling(float animation_time);
+};
+
+
+struct BoneInfo {
+	int id = -1; // index in bone matrices
+	glm::mat4 offset; // transfer vertex from model space -> bone space
+
+	BoneInfo() = default;
+	BoneInfo(int id, glm::mat4& offset) : id(id), offset(offset) {}
 };
 
 
