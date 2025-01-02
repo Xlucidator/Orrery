@@ -16,6 +16,11 @@ struct Vertex {
 
 	int bone_ids[MAX_BONE_INFLUENCE] = { -1 };
 	float weights[MAX_BONE_INFLUENCE] = { 0.0f };
+
+	Vertex() {
+		memset(bone_ids, -1, sizeof(bone_ids));
+		memset(weights, 0.0f, sizeof(weights));
+	}
 };
 
 struct Texture {
@@ -37,10 +42,14 @@ public:
 
 	void draw(Shader* shader);
 
+	/* Debug */
+	void printVertices();
+
 private:
 	/* Render Data */
 	GLuint _vao, _vbo, _ebo;
 	void setup();
+
 };
 
 

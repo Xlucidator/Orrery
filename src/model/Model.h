@@ -34,6 +34,14 @@ public:
 	bool has_animation = false;
 	std::shared_ptr<Animation> animation = nullptr;
 
+	/* Debug */
+	void printMesh() {
+		for (auto& mesh : _meshes) {
+			mesh.printVertices();
+			std::cout << std::endl;
+		}
+	}
+
 private:
 	std::vector<Mesh> _meshes;
 	std::vector<Texture> _textures_loaded;

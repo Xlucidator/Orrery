@@ -69,6 +69,7 @@ void Model::load(std::string& path) {
 
 	// Prepare Animation
 	if (scene->HasAnimations()) {
+		std::cout << "Has Animation: " << path << std::endl;
 		animation = std::make_shared<Animation>(scene, *this);
 		has_animation = true;
 	}
@@ -186,28 +187,29 @@ void Model::setPxCombinedMesh() {
 /* Bone */
 void Model::extractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene) {
 	
-	for (int bone_index = 0; bone_index < mesh->mNumBones; bone_index++) {
+	for (int i = 0; i < mesh->mNumBones; i++) {
+		aiBone* bone = mesh->mBones[i];
+
 		int bone_id = -1;
-		std::string bone_name(mesh->mBones[bone_index]->mName.data);
+		std::string bone_name(bone->mName.data);
+		aiVertexWeight* weights = bone->mWeights;
+		int weight_num = bone->mNumWeights;
 
 		// Find & Create Bone (with bone name) in _bone_info_map
 		if (_bone_info_map.find(bone_name) == _bone_info_map.end()) { // new one
-			glm::mat4 offset_mat = AssimpGLMHelpers::toGLMMat4(mesh->mBones[bone_index]->mOffsetMatrix);
-
-			BoneInfo new_bone_info(_bone_cnt, offset_mat);
 			bone_id = _bone_cnt++;
+			glm::mat4 offset_mat = AssimpGLMHelpers::toGLMMat4(bone->mOffsetMatrix);
 
+			BoneInfo new_bone_info(bone_id, offset_mat);
 			_bone_info_map[bone_name] = new_bone_info;
 		} else { // old one
 			bone_id = _bone_info_map[bone_name].id;
 		}
 
-		// Gather Bone Info into Corresponding Vertex
-		auto weights = mesh->mBones[bone_index]->mWeights;
-		int weight_num = mesh->mBones[bone_index]->mNumWeights;
-		for (int weight_index = 0; weight_index < weight_num; weight_index++) {
-			int vertex_id = weights[weight_index].mVertexId;
-			float weight = weights[weight_index].mWeight;
+		// Add Bone Info into Corresponding Vertex
+		for (int j = 0; j < weight_num; j++) {
+			int vertex_id = weights[j].mVertexId;
+			float weight = weights[j].mWeight;
 			assert(vertex_id <= vertices.size());
 			setVertexBoneData(vertices[vertex_id], bone_id, weight);
 		}

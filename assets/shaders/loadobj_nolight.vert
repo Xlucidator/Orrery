@@ -15,20 +15,29 @@ const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
 uniform mat4 finalBonesMatrices[MAX_BONES];
 
+/* Debug */
+out vec4 finalPosition;
+
 void main() {
     /* Animate Update */
+    bool hasAnimation = false;
     vec4 totalPosition = vec4(0.0f);
     for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
         if(aBoneIds[i] == -1) continue;
+        hasAnimation = true;
         if(aBoneIds[i] >= MAX_BONES) {
-            totalPosition = vec4(aPos,1.0f);
+            totalPosition = vec4(aPos, 1.0f);
             break;
         }
-        vec4 localPosition = finalBonesMatrices[aBoneIds[i]] * vec4(aPos,1.0f);
+        vec4 localPosition = finalBonesMatrices[aBoneIds[i]] * vec4(aPos, 1.0f);
         totalPosition += localPosition * aWeights[i];
         vec3 localNormal = mat3(finalBonesMatrices[aBoneIds[i]]) * aNormal;
     }
 
-    TexCoords = aTexCoords;    
+    if (!hasAnimation) totalPosition = vec4(aPos, 1.0f);
+
+    finalPosition = totalPosition;
+    TexCoords = aTexCoords;
+    //gl_Position = projection * view * model * totalPosition;
     gl_Position = projection * view * model * totalPosition;
 }

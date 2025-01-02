@@ -55,7 +55,7 @@ void Mesh::setup() {
 		GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo));
 		GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW));
 		
-		/*=== connect vbo and ebo with vao ===*/
+		/*=== connect vbo with vao ===*/
 		// vertex position
 		GL_CALL(glEnableVertexAttribArray(0));
 		GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0));
@@ -72,4 +72,23 @@ void Mesh::setup() {
 		GL_CALL(glEnableVertexAttribArray(4));
 		GL_CALL(glVertexAttribPointer(4, MAX_BONE_INFLUENCE, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, weights)));
 	});
+}
+
+void Mesh::printVertices() {
+	for (int i = 0; i < vertices.size(); i++) {
+		std::cout << "Vertex[" << i << "]: " << std::endl;
+		std::cout << "\tPosition: " << vertices[i].position.x << " " << vertices[i].position.y << " " << vertices[i].position.z << std::endl;
+		//std::cout << "\tNormal: " << vertices[i].normal.x << " " << vertices[i].normal.y << " " << vertices[i].normal.z << std::endl;
+		//std::cout << "\tTexcoord: " << vertices[i].texcoord.x << " " << vertices[i].texcoord.y << std::endl;
+		std::cout << "\tBone Ids: ";
+		for (int j = 0; j < MAX_BONE_INFLUENCE; j++) {
+			std::cout << vertices[i].bone_ids[j] << " ";
+		}
+		std::cout << std::endl;
+		std::cout << "\tWeights: ";
+		for (int j = 0; j < MAX_BONE_INFLUENCE; j++) {
+			std::cout << vertices[i].weights[j] << " ";
+		}
+		std::cout << std::endl;
+	}
 }
