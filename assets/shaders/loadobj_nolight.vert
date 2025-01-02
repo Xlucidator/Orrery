@@ -1,9 +1,15 @@
 #version 460 core
+
+#define MAX_BONE_INFLUENCE 4
+#define MAX_BONES 100
+
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoords;
 layout(location = 3) in ivec4 aBoneIds; 
 layout(location = 4) in vec4 aWeights;
+//layout(location = 3) in int aBoneIds[MAX_BONE_INFLUENCE]; 
+//layout(location = 4) in float aWeights[MAX_BONE_INFLUENCE];
 
 out vec2 TexCoords;
 
@@ -11,8 +17,6 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-const int MAX_BONES = 100;
-const int MAX_BONE_INFLUENCE = 4;
 uniform mat4 finalBonesMatrices[MAX_BONES];
 
 /* Debug */

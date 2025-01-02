@@ -81,12 +81,14 @@ void World::initObjects() {
 	);
 	
 	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");
-	//auto box = std::make_shared<Model>("assets/objects/box/box_resize.obj");
-	//auto barrels = std::make_shared<Model>("assets/objects/barrelpack/barrels_packed.obj");
-	auto vampire = std::make_shared<Model>("assets/objects/vampire/dancing_vampire.dae");
+	auto box = std::make_shared<Model>("assets/objects/box/box_resize.obj");
+	auto barrels = std::make_shared<Model>("assets/objects/barrelpack/barrels_packed.obj");
+	//auto vampire = std::make_shared<Model>("assets/objects/vampire/dancing_vampire.dae");
+	auto knight = std::make_shared<Model>("assets/objects/knightguard/Knighty92-onlyman.fbx");
+	auto avatar = std::make_shared<Model>("assets/objects/darknight/darknight.fbx");
 
 	/* debug */
-	//vampire->printMesh();
+	//knight->printMesh();
 
 	// Create Objects
 	glm::mat4 model_transform[] = {
@@ -94,12 +96,14 @@ void World::initObjects() {
 		createModelMatrix(glm::vec3(-1.0f, 0.0f, 0.0f)),
 		createModelMatrix(glm::vec3(3.0f, 0.0f, -4.0f)),
 		createModelMatrix(glm::vec3(2.0f, 0.0f, -6.0f)),
-		createModelMatrix(glm::vec3(-2.0f, 0.0f, -1.0f)/*, glm::vec3(0.5f)*/)
+		createModelMatrix(glm::vec3(-2.0f, 0.0f, -1.0f)/*, glm::vec3(0.5f)*/),
+		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.7f))
 	};
 	_objects.emplace_back(_global_shader, barrel, model_transform[0]);
 	_objects.emplace_back(_global_shader, box   , model_transform[1]);
 	_objects.emplace_back(_global_shader, barrels, model_transform[2]);
-	_objects.emplace_back(_global_shader, vampire, model_transform[3]);
+	_objects.emplace_back(_global_shader, avatar, model_transform[3]);
+	_objects.emplace_back(_global_shader, knight, model_transform[4]);
 
 	// init Objects Physics
 #ifdef PHYSIC_IMPL

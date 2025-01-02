@@ -14,8 +14,8 @@ struct Vertex {
 	glm::vec3 normal;
 	glm::vec2 texcoord;
 
-	int bone_ids[MAX_BONE_INFLUENCE] = { -1 };
-	float weights[MAX_BONE_INFLUENCE] = { 0.0f };
+	int bone_ids[MAX_BONE_INFLUENCE];
+	float weights[MAX_BONE_INFLUENCE];
 
 	Vertex() {
 		memset(bone_ids, -1, sizeof(bone_ids));
