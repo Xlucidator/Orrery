@@ -1,47 +1,29 @@
 
 #include "Camera.h"
-
+#include "utils.h"
 
 Camera::Camera(glm::vec3 pos, glm::vec3 wup, float yaw, float pitch):
 		position(pos), world_up(wup), yaw(yaw), pitch(pitch),
 		front(glm::vec3(0.0f, 0.0f, -1.0f)), // reverse to direction
 		movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), zoom(ZOOM) {
-	_fake_front = glm::vec3(0.0f, 0.0f, -1.0f);
-	_fake_yaw = yaw;
+
 	update();
 }
 
 
 /* Camera Movement */
-void Camera::processKeyboard(Movement direction, float delta_time) {
-	float velocity = movement_speed * delta_time;
-	switch (direction) {
-		case FORWARD: position += front * velocity; break;
-		case BACKWARD:position -= front * velocity; break;
-		case LEFT:	  position -= right * velocity; break;
-		case RIGHT:	  position += right * velocity; break;
-		default: break;
-	}
-}
+void Camera::processKeyboard(/*Movement direction, */float delta_t) {
+	float velocity = movement_speed * delta_t;
 
-void Camera::processKeyboard(float delta_time) {
-	/* position and rotation */
-	float velocity = movement_speed * delta_time;
-	// TODO: more direction
-	if (keyboard[GLFW_KEY_W]) {
-		_fake_yaw = -90.0f;
+	glm::vec3 pace = static_cast<float>(keyboard[GLFW_KEY_W]) * pace_vec[GLFW_KEY_W]
+				   + static_cast<float>(keyboard[GLFW_KEY_S]) * pace_vec[GLFW_KEY_S]
+				   + static_cast<float>(keyboard[GLFW_KEY_A]) * pace_vec[GLFW_KEY_A]
+				   + static_cast<float>(keyboard[GLFW_KEY_D]) * pace_vec[GLFW_KEY_D];
+	
+	if (pace != glm::vec3(0.0f, 0.0f, 0.0f)) {
+		pace = glm::normalize(pace);
+		position += pace * velocity;
 	}
-	else if (keyboard[GLFW_KEY_D]) {
-		_fake_yaw = 0.0f;
-	}
-	else if (keyboard[GLFW_KEY_S]) {
-		_fake_yaw = 90.0f;
-	}
-	else if (keyboard[GLFW_KEY_A]) {
-		_fake_yaw = 180.0f;
-	}
-	updateFakeFront();
-	position += _fake_front * velocity;
 }
 
 void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrain_pitch) {
@@ -67,7 +49,6 @@ void Camera::processMouseScroll(float yoffset) {
 }
 
 
-
 /* Camera Vector Update */ 
 void Camera::update() {
 	/* Calculate the new Front vector */
@@ -82,8 +63,4 @@ void Camera::update() {
 	this->up = glm::normalize(glm::cross(this->right, this->front));
 }
 
-void Camera::updateFakeFront() {
-	_fake_front.x = cos(glm::radians(_fake_yaw));
-	_fake_front.z = sin(glm::radians(_fake_yaw));
-}
 

@@ -29,17 +29,12 @@ public:
 
 	glm::mat4 getViewMatrix() { return glm::lookAt(position, position + front, up); }
 
-	void processKeyboard(Movement direction, float delta_time);
-	void processKeyboard(float delta_time);
+	void processKeyboard(/*Movement direction, */float delta_time);
 	void processMouseMovement(float xoffset, float yoffset, GLboolean constrain_pitch = true);
 	void processMouseScroll(float yoffset);
 
 private:
-	glm::vec3 _fake_front; // for movement, do not involve in view at all
-	float _fake_yaw;
-
 	void update(); // update camera vector
-	void updateFakeFront();
 };
 
 #endif // !CAMERA_H

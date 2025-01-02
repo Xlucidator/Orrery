@@ -12,7 +12,12 @@
 class Object {
 public:
 	Object() {}
-	Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 model_matrix = glm::mat4(1.0f));
+	Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 raw_model_matrix,
+		float scale = 1.0f);
+	Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, 
+		glm::vec3 position = glm::vec3(0.0f), float scale = 1.0f,
+		glm::vec3 front = glm::vec3(0.0f, 0.0f, 1.0f), 
+		glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f));
 	~Object() {
 		if (rigid_static) { rigid_static->release(); }
 		if (rigid_dynamic) { rigid_dynamic->release();  }
@@ -59,13 +64,16 @@ protected:
 	std::shared_ptr<Shader> _shader = nullptr; // shared
 	std::shared_ptr<Model> _model = nullptr;   // shared
 	
+	/* Object Pose */
 	glm::mat4 _model_matrix;
 	glm::mat3 _norm_model_matrix;
-	// in details
+	// Model Matrix in Details
 	glm::vec3 _position;
+	glm::vec3 _world_up;
+	glm::vec3 _front, _right, _up;
 	float _scale = 1.0f; // TODO: do not use
 	glm::quat _rotation;
-	// for Px
+	// For Physics Transform
 	physx::PxTransform _px_transform;
 	
 	inline void updateNormModelMatrix() {

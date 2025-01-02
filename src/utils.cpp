@@ -39,6 +39,20 @@ glm::mat4 createModelMatrix(const glm::vec3& position, const glm::vec3& scale) {
 //	return model; // // model = translate * rotate * scale
 //}
 
+glm::mat4 createModelMatrix(const glm::vec3& position, const glm::vec3& front, const glm::vec3& up, const glm::vec3& right, const glm::vec3& scale) {
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, position);
+
+	glm::mat4 rotation = glm::mat4(1.0f);
+	rotation[0] = glm::vec4(right, 0.0f); 
+	rotation[1] = glm::vec4(up, 0.0f);
+	rotation[2] = glm::vec4(front, 0.0f); // TODO: check, whether front or -front
+	model = model * rotation;
+	
+	model = glm::scale(model, scale);
+	return model;
+}
+
 glm::mat4 createModelMatrix(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, position);
@@ -46,3 +60,10 @@ glm::mat4 createModelMatrix(const glm::vec3& position, const glm::quat& rotation
 	model = glm::scale(model, scale);
 	return model; // // model = translate * rotate * scale
 }
+
+std::unordered_map<int8_t, glm::vec3> pace_vec = {
+	{ GLFW_KEY_W, glm::vec3( 0.0f, 0.0f, -1.0f) },
+	{ GLFW_KEY_S, glm::vec3( 0.0f, 0.0f,  1.0f) },
+	{ GLFW_KEY_A, glm::vec3(-1.0f, 0.0f,  0.0f) },
+	{ GLFW_KEY_D, glm::vec3( 1.0f, 0.0f,  0.0f) }
+};

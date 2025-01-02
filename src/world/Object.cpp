@@ -1,22 +1,41 @@
 
 #include "Object.h"
 
+#include "utils.h"
+
 #include <vector>
 
-Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 model_matrix) {
-	_model = model;
-	_shader = shader;
+Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 raw_model_matrix, float scale)
+		: _model(model), _shader(shader),
+		  _scale(scale) {
 
-	_model_matrix = model_matrix;
+	_model_matrix = glm::scale(raw_model_matrix, glm::vec3(_scale));
 	updateNormModelMatrix();
-	// in details
-	_position = glm::vec3(model_matrix[3][0], model_matrix[3][1], model_matrix[3][2]);
-	_scale = 1.0f; // TODO: has not handle Scale
-	glm::mat3 rotate_mat = glm::mat3(model_matrix);
-	//rotate_mat = glm::normalize(rotate_mat);
+
+	/* Calculate Details */
+	_position = glm::vec3(_model_matrix[3][0], _model_matrix[3][1], _model_matrix[3][2]); // TODO: silly
+	glm::mat3 rotate_mat = glm::mat3(raw_model_matrix); // TODO: up may be conflict with world up
 	_rotation = glm::quat_cast(rotate_mat);
 	
-	// Set Animator
+	/* Set Animator */
+	animator = std::make_shared<Animator>(model->animation);
+}
+
+Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model,
+		glm::vec3 position, float scale, glm::vec3 front, glm::vec3 world_up)
+		: _model(model), _shader(shader),
+		  _position(position), _scale(scale), _front(front), _world_up(world_up) {
+	
+	_front = glm::normalize(front); // assume world_up to be normalized
+	_right = glm::normalize(glm::cross(_front, _world_up));
+	_up = glm::normalize(glm::cross(_right, _front));
+
+	/* Calculate Matrices */
+	_model_matrix = createModelMatrix(_position, _front, _up, _right, glm::vec3(_scale));
+	updateNormModelMatrix();
+	_rotation = glm::quat_cast(glm::mat3(_right, _up, _front)); // TODO: check, whether _front or -_front
+
+	/* Set Animator */
 	animator = std::make_shared<Animator>(model->animation);
 }
 

@@ -99,13 +99,13 @@ void World::initObjects() {
 		createModelMatrix(glm::vec3(-1.0f, 0.0f,  0.0f)),
 		createModelMatrix(glm::vec3( 3.0f, 0.0f, -4.0f)),
 		createModelMatrix(glm::vec3( 2.0f, 0.0f, -6.0f)),
-		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.7f))
+		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f))
 	};
 
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, model_transform[0]));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, box   , model_transform[1]));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2]));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3]));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], 0.7f));
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
@@ -168,22 +168,21 @@ void World::initPhysics() {
 
 /*=== Interact ===*/
 void World::processKeyboardPress() {
-	if (keyboard[GLFW_KEY_W] || keyboard[GLFW_KEY_S] || keyboard[GLFW_KEY_A] || keyboard[GLFW_KEY_D]) {
+	if (is_wasd()) {
 		_player->walk();
 	}
 }
 
+// Attension: This function is called successively every window refresh, not keyboard callback
 void World::processKeyboardInput() {
-	//if (keyboard[GLFW_KEY_W]) _camera.processKeyboard(FORWARD, _delta_time);
-	//if (keyboard[GLFW_KEY_S]) _camera.processKeyboard(BACKWARD, _delta_time);
-	//if (keyboard[GLFW_KEY_A]) _camera.processKeyboard(LEFT, _delta_time);
-	//if (keyboard[GLFW_KEY_D]) _camera.processKeyboard(RIGHT, _delta_time);
-	_player->processKeyboard(_delta_time);
-	_camera.processKeyboard(_delta_time);
+	if (is_wasd()) {
+		_camera.processKeyboard(_delta_time);
+		_player->processKeyboard(_delta_time);
+	}
 }
 
 void World::processKeyboardRelease() {
-	if (!keyboard[GLFW_KEY_W] && !keyboard[GLFW_KEY_S] && !keyboard[GLFW_KEY_A] && !keyboard[GLFW_KEY_D]) {
+	if (!is_wasd()) {
 		_player->idle();
 	}
 }

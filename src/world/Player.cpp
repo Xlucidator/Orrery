@@ -13,28 +13,25 @@ void Player::update(float _delta_time) {
 void Player::processKeyboard(float delta_time) {
 	/* position and rotation */
 	float velocity = _movement_speed * delta_time;
-	// TODO: more direction
-	if (keyboard[GLFW_KEY_W]) {
-		_yaw = -90.0f;
-	} 
-	else if (keyboard[GLFW_KEY_D]) {
-		_yaw = 0.0f;
+
+	// be careful: assume true = 1, false = 0
+	glm::vec3 pace = static_cast<float>(keyboard[GLFW_KEY_W]) * pace_vec[GLFW_KEY_W] 
+				   + static_cast<float>(keyboard[GLFW_KEY_S]) * pace_vec[GLFW_KEY_S] 
+				   + static_cast<float>(keyboard[GLFW_KEY_A]) * pace_vec[GLFW_KEY_A] 
+				   + static_cast<float>(keyboard[GLFW_KEY_D]) * pace_vec[GLFW_KEY_D];
+	
+	if (pace != glm::vec3(0.0f, 0.0f, 0.0f)) {
+		pace = glm::normalize(pace);
+		_front = pace; // depend on createModelMactrix: front (not -front)
+		_position += pace * velocity;
 	}
-	else if (keyboard[GLFW_KEY_S]) {
-		_yaw = 90.0f;
-	}
-	else if (keyboard[GLFW_KEY_A]) {
-		_yaw = 180.0f;	
-	}
-	updateFront();
-	_position += _front * velocity;
 }
 
 void Player::processMouseMovement(float xoffset, float yoffset) {
 
 }
 
-void Player::updateFront() {
-	_front.x = cos(glm::radians(_yaw));
-	_front.z = sin(glm::radians(_yaw));
+void Player::processMouseScroll(float yoffset) {
+
 }
+

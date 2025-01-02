@@ -24,6 +24,7 @@
 extern uint32_t viewport_width;
 extern uint32_t viewport_height;
 extern bool keyboard[128];
+inline bool is_wasd() { return keyboard[GLFW_KEY_W] || keyboard[GLFW_KEY_A] || keyboard[GLFW_KEY_S] || keyboard[GLFW_KEY_D]; }
 
 using ResizeCB = void(*)(int, int);
 using KeyboardCB = void(*)(int, int, int, int);
