@@ -86,7 +86,7 @@ void World::initObjects() {
 	auto vampire = std::make_shared<Model>("assets/objects/vampire/dancing_vampire.dae");
 
 	/* debug */
-	//barrel->printMesh();
+	//vampire->printMesh();
 
 	// Create Objects
 	glm::mat4 model_transform[] = {
@@ -94,11 +94,11 @@ void World::initObjects() {
 		createModelMatrix(glm::vec3(-1.0f, 0.0f, 0.0f)),
 		createModelMatrix(glm::vec3(3.0f, 0.0f, -4.0f)),
 		createModelMatrix(glm::vec3(2.0f, 0.0f, -6.0f)),
-		createModelMatrix(glm::vec3(-2.0f, 0.0f, -1.0f), glm::vec3(0.02f))
+		createModelMatrix(glm::vec3(-2.0f, 0.0f, -1.0f)/*, glm::vec3(0.5f)*/)
 	};
 	_objects.emplace_back(_global_shader, barrel, model_transform[0]);
-	//_objects.emplace_back(_global_shader, box   , model_transform[1]);
-	//_objects.emplace_back(_global_shader, barrels, model_transform[2]);
+	_objects.emplace_back(_global_shader, box   , model_transform[1]);
+	_objects.emplace_back(_global_shader, barrels, model_transform[2]);
 	_objects.emplace_back(_global_shader, vampire, model_transform[3]);
 
 	// init Objects Physics

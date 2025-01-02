@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 #include <map>
-
+#include <fstream>
 
 GLuint textureFromFile(const char* path, const std::string& directory, bool gamma = false);
 
@@ -36,10 +36,16 @@ public:
 
 	/* Debug */
 	void printMesh() {
+		std::ofstream out("output.txt");
+		std::streambuf* cout_buf = std::cout.rdbuf(); // save origin buffer
+		std::cout.rdbuf(out.rdbuf()); // redirect buffer
+
 		for (auto& mesh : _meshes) {
 			mesh.printVertices();
 			std::cout << std::endl;
 		}
+
+		std::cout.rdbuf(cout_buf); // recover
 	}
 
 private:
