@@ -27,8 +27,8 @@ public:
 	}
 	~Player() {}
 
-	inline void walk() { _status = PLAYER_WALK; }
-	inline void idle() { _status = PLAYER_IDLE; animator->reset(); }
+	void walk();
+	void idle();
 	void update(float delta_time) override;
 
 	void processKeyboard(float delta_time) override;
@@ -44,6 +44,8 @@ public:
 protected:
 	PlayerStatus _status = PLAYER_IDLE;
 	float _movement_speed = 5.0f;
+
+	irrklang::ISound* walking_sound = nullptr;
 };
 
 #endif // !PLAYER_H

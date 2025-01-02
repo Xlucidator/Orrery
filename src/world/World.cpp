@@ -13,6 +13,7 @@ World::World() {
 	/* Init Light */
 	_light_pos = glm::vec3(1.2f, 1.0f, 2.0f);
 	_light_color = glm::vec3(1.0f);
+
 }
 
 void World::init() {
@@ -20,6 +21,9 @@ void World::init() {
 	initPhysics();
 #endif
 	initObjects();
+
+	/* Init BGM */
+	sound_engine->play2D("assets/audios/Skeleton_A_Bloody_Labyrinth.mp3", true);
 }
 
 void World::update() {
@@ -76,7 +80,7 @@ void World::initObjects() {
 		"assets/shaders/loadobj_nolight.frag"
 	);
 
-	auto ground = std::make_shared<Model>("assets/objects/ground/ground.obj");
+	auto ground = std::make_shared<Model>("assets/objects/ground/bigger_ground.obj");
 	auto avatar = std::make_shared<Model>("assets/objects/darknight/darknight.fbx");
 	
 	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");

@@ -1,4 +1,4 @@
-PhysX:
+PhysX: v5.5
  pvd not used
  - dll: 'PVDRuntime_64.dll' maybe useless
  - lib: 'PVDRuntime_64.dll' maybe useless
@@ -6,3 +6,5 @@ PhysX:
 
 GLFW:
  glfw3.dll not used
+
+irrKlang: v1.5

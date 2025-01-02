@@ -2,6 +2,23 @@
 #include "Player.h"
 
 
+
+void Player::walk() {
+	_status = PLAYER_WALK; 
+	if (!walking_sound || walking_sound->isFinished()) {
+		walking_sound = sound_engine->play2D("assets/audios/walking.mp3", true, false, true);
+		walking_sound->setVolume(0.8f);
+	}
+}
+
+void Player::idle() { 
+	_status = PLAYER_IDLE; 
+	animator->reset(); 
+	if (walking_sound && !walking_sound->isFinished()) {
+		walking_sound->stop();
+	}
+}
+
 void Player::update(float _delta_time) {
 	updateModelMatrix();
 	if (_status == PLAYER_WALK) {

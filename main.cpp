@@ -18,6 +18,8 @@ float last_y = (float)viewport_height / 2.0f;
 
 World world;
 
+irrklang::ISoundEngine* sound_engine = irrklang::createIrrKlangDevice();
+
 /*=== Callback Handler ===*/
 void onResize(int width, int height);
 void onKeyChange(int key, int scancode, int action, int mods);
@@ -45,6 +47,7 @@ int main() {
     }
 
     APP->destroy();
+    sound_engine->drop(); // Maybe can be placed in APP, but maybe troublesome
     std::cout << "cleared" << std::endl;
     return 0;
 }
