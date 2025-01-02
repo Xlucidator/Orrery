@@ -34,7 +34,8 @@ public:
 
 private:
 	/*=== Object ===*/
-	std::vector<Object> _objects;
+	std::shared_ptr<Object> _player = nullptr;
+	std::vector<std::shared_ptr<Object>> _objects;
 
 	/*=== Camera ===*/
 	Camera _camera;

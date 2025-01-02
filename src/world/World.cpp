@@ -8,7 +8,7 @@ World::World() {
 	_delta_time = 0.0f;
 
 	/* Init Camera */
-	_camera = Camera(glm::vec3(0.0f, 0.0f, 10.0f));
+	_camera = Camera(glm::vec3(0.0f, 11.0f, 10.0f));
 
 	/* Init Light */
 	_light_pos = glm::vec3(1.2f, 1.0f, 2.0f);
@@ -33,7 +33,7 @@ void World::update() {
 
 	/* Animate */
 	for (auto& obj : _objects) {
-		obj.animator->update(_delta_time);
+		obj->update(_delta_time);
 	}
 
 	/* Get Physcs Simulation */
@@ -42,7 +42,7 @@ void World::update() {
 		mScene->simulate(_delta_time);
 		mScene->fetchResults(true);
 		for (auto& obj : _objects) {
-			obj.updateSimulateResult();
+			obj->updateSimulateResult();
 		}
 	}
 #endif
@@ -63,11 +63,7 @@ void World::render() {
 	_global_shader->setMat4f("view", glm::value_ptr(_view));
 	_global_shader->setMat4f("projection", glm::value_ptr(_projection));
 	for (auto& obj : _objects) {
-		//_model = obj.getModelMatrix();
-		//_global_shader->setMat4f("model", glm::value_ptr(_model));
-		//_norm_model = obj.getNormModelMatrix();
-		//_global_shader->setMat4f("normModel", glm::value_ptr(_norm_model));
-		obj.draw(_global_shader);
+		obj->draw(_global_shader);
 	}
 
 	_global_shader->end();
@@ -79,6 +75,8 @@ void World::initObjects() {
 		"assets/shaders/loadobj_nolight.vert", 
 		"assets/shaders/loadobj_nolight.frag"
 	);
+
+	auto ground = std::make_shared<Model>("assets/objects/ground/ground.obj");
 	
 	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");
 	auto box = std::make_shared<Model>("assets/objects/box/box_resize.obj");
@@ -90,6 +88,11 @@ void World::initObjects() {
 	/* debug */
 	//knight->printMesh();
 
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, ground));
+
+	_player = std::make_shared<Object>(_global_shader, avatar);
+	_objects.push_back(_player);
+
 	// Create Objects
 	glm::mat4 model_transform[] = {
 		// Location					 // Scale
@@ -99,15 +102,14 @@ void World::initObjects() {
 		createModelMatrix(glm::vec3(-2.0f, 0.0f, -1.0f)/*, glm::vec3(0.5f)*/),
 		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.7f))
 	};
-	_objects.emplace_back(_global_shader, barrel, model_transform[0]);
-	_objects.emplace_back(_global_shader, box   , model_transform[1]);
-	_objects.emplace_back(_global_shader, barrels, model_transform[2]);
-	_objects.emplace_back(_global_shader, avatar, model_transform[3]);
-	_objects.emplace_back(_global_shader, knight, model_transform[4]);
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, model_transform[0]));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, box   , model_transform[1]));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2]));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[4]));
 
 	// init Objects Physics
 #ifdef PHYSIC_IMPL
-	auto barrel_actor = _objects[0].createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
+	auto barrel_actor = _objects[0]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
 	mScene->addActor(*barrel_actor);
 #endif
 }
@@ -173,7 +175,7 @@ void World::processKeyboardInput() {
 }
 
 void World::processMouseMovement(float xoffset, float yoffset) {
-	_camera.processMouseMovement(xoffset, yoffset, true);
+	//_camera.processMouseMovement(xoffset, yoffset, true);
 }
 
 void World::processMouseScroll(float yoffset) {

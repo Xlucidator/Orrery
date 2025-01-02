@@ -36,8 +36,8 @@ void Object::draw(std::shared_ptr<Shader>& shader) {
 	_model->draw(shader.get());
 }
 
-void Object::update(std::shared_ptr<Shader>& shader) {
-
+void Object::update(float delta_time) {
+	animator->update(delta_time);
 }
 
 void Object::render(glm::vec3& view, glm::vec3& projection) { // DO NOT USE

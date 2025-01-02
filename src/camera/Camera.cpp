@@ -6,24 +6,43 @@ Camera::Camera(glm::vec3 pos, glm::vec3 wup, float yaw, float pitch):
 		position(pos), world_up(wup), yaw(yaw), pitch(pitch),
 		front(glm::vec3(0.0f, 0.0f, -1.0f)), // reverse to direction
 		movement_speed(SPEED), mouse_sensitivity(SENSITIVITY), zoom(ZOOM) {
+	_fake_front = glm::vec3(0.0f, 0.0f, -1.0f);
+	_fake_yaw = yaw;
 	update();
 }
-
-Camera::~Camera() {
-
-}
-
 
 /* Camera Movement */
 void Camera::processKeyboard(Movement direction, float delta_t) {
 	float velocity = movement_speed * delta_t;
 	switch (direction) {
-		case FORWARD: position += front * velocity; break;
-		case BACKWARD:position -= front * velocity; break;
-		case LEFT:	  position -= right * velocity; break;
-		case RIGHT:	  position += right * velocity; break;
+		case FORWARD: _fake_yaw = -90.0f; break;
+		case BACKWARD:_fake_yaw =  90.0f; break;
+		case LEFT:	  _fake_yaw = 180.0f; break;
+		case RIGHT:	  _fake_yaw =   0.0f; break;
 		default: break;
 	}
+	updateFakeFront();
+	position += _fake_front * velocity;
+}
+
+void Camera::processKeyboard(float delta_time) {
+	/* position and rotation */
+	float velocity = movement_speed * delta_time;
+	// TODO: more direction
+	if (keyboard[GLFW_KEY_W]) {
+		_fake_yaw = -90.0f;
+	}
+	else if (keyboard[GLFW_KEY_D]) {
+		_fake_yaw = 0.0f;
+	}
+	else if (keyboard[GLFW_KEY_S]) {
+		_fake_yaw = 90.0f;
+	}
+	else if (keyboard[GLFW_KEY_A]) {
+		_fake_yaw = 180.0f;
+	}
+	updateFakeFront();
+	position += _fake_front * velocity;
 }
 
 void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrain_pitch) {
@@ -62,4 +81,9 @@ void Camera::update() {
 	this->front = glm::normalize(front);
 	this->right = glm::normalize(glm::cross(this->front, this->world_up));
 	this->up = glm::normalize(glm::cross(this->right, this->front));
+}
+
+void Camera::updateFakeFront() {
+	_fake_front.x = cos(glm::radians(_fake_yaw));
+	_fake_front.z = sin(glm::radians(_fake_yaw));
 }

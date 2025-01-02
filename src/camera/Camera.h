@@ -4,7 +4,7 @@
 #include "common.h"
 
 const float YAW = -90.0f;
-const float PITCH = 0.0f;
+const float PITCH = -50.0f;
 const float SPEED = 5.0f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
@@ -25,16 +25,21 @@ public:
 
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 wup = glm::vec3(0.0f, 1.0f, 0.0f), 
 		   float yaw = YAW, float pitch = PITCH);
-	~Camera();
+	~Camera() = default;
 
 	glm::mat4 getViewMatrix() { return glm::lookAt(position, position + front, up); }
 
 	void processKeyboard(Movement direction, float deltaTime);
+	void processKeyboard(float deltaTime);
 	void processMouseMovement(float xoffset, float yoffset, GLboolean constrain_pitch = true);
 	void processMouseScroll(float yoffset);
 
 private:
+	glm::vec3 _fake_front; // for movement, do not involve in view at all
+	float _fake_yaw;
+
 	void update(); // update camera vector
+	void updateFakeFront();
 };
 
 #endif // !CAMERA_H

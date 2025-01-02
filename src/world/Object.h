@@ -24,7 +24,7 @@ public:
 
 	void render(glm::vec3& view, glm::vec3& projection); // TODO: whether render here or out
 	void draw(std::shared_ptr<Shader>& shader);
-	void update(std::shared_ptr<Shader>& shader);
+	void update(float delta_time);
 
 	void setModelMatrix(glm::mat4 model) { 
 		_model_matrix = model;
@@ -62,7 +62,7 @@ private:
 	glm::mat3 _norm_model_matrix;
 	// in details
 	glm::vec3 _position;
-	float _scale; // TODO: do not use
+	float _scale = 1.0f; // TODO: do not use
 	glm::quat _rotation;
 	// for Px
 	physx::PxTransform _px_transform;
