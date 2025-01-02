@@ -62,9 +62,11 @@ void onKeyChange(int key, int scancode, int action, int mods) {
     if (0 <= key && key < 128) {
         if (action == GLFW_PRESS) {
             keyboard[key] = true;
+            world.processKeyboardPress();
         }
         else if (action == GLFW_RELEASE) {
             keyboard[key] = false;
+            world.processKeyboardRelease();
         }
     }
 }

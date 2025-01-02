@@ -8,13 +8,10 @@
 
 #include <string>
 
-enum OBJType {
-	MODEL = 0,
-	SIMPLE
-};
 
 class Object {
 public:
+	Object() {}
 	Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 model_matrix = glm::mat4(1.0f));
 	~Object() {
 		if (rigid_static) { rigid_static->release(); }
@@ -24,7 +21,7 @@ public:
 
 	void render(glm::vec3& view, glm::vec3& projection); // TODO: whether render here or out
 	void draw(std::shared_ptr<Shader>& shader);
-	void update(std::shared_ptr<Shader>& shader);
+	virtual void update(float _delta_time);
 
 	void setModelMatrix(glm::mat4 model) { 
 		_model_matrix = model;
@@ -53,8 +50,12 @@ public:
 	/* Animator: Drive Animation */
 	std::shared_ptr<Animator> animator = nullptr;
 
-private:
-	OBJType _type;
+	/* Interact */
+	virtual void processKeyboard(float delta_time) {}
+	virtual void processMouseMovement(float xoffset, float yoffset) {}
+	virtual void processMouseScroll(float yoffset) {}
+
+protected:
 	std::shared_ptr<Shader> _shader = nullptr; // shared
 	std::shared_ptr<Model> _model = nullptr;   // shared
 	
@@ -62,12 +63,14 @@ private:
 	glm::mat3 _norm_model_matrix;
 	// in details
 	glm::vec3 _position;
-	float _scale; // TODO: do not use
+	float _scale = 1.0f; // TODO: do not use
 	glm::quat _rotation;
 	// for Px
 	physx::PxTransform _px_transform;
 	
-	inline void updateNormModelMatrix();
+	inline void updateNormModelMatrix() {
+		_norm_model_matrix = glm::transpose(glm::inverse(glm::mat3(_model_matrix)));
+	}
 
 	/* Physics */
 	physx::PxTriangleMesh* px_triangle_mesh = nullptr;

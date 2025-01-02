@@ -8,7 +8,7 @@ World::World() {
 	_delta_time = 0.0f;
 
 	/* Init Camera */
-	_camera = Camera(glm::vec3(0.0f, 0.0f, 10.0f));
+	_camera = Camera(glm::vec3(0.0f, 11.0f, 10.0f));
 
 	/* Init Light */
 	_light_pos = glm::vec3(1.2f, 1.0f, 2.0f);
@@ -33,7 +33,7 @@ void World::update() {
 
 	/* Animate */
 	for (auto& obj : _objects) {
-		obj.animator->update(_delta_time);
+		obj->update(_delta_time);
 	}
 
 	/* Get Physcs Simulation */
@@ -42,7 +42,7 @@ void World::update() {
 		mScene->simulate(_delta_time);
 		mScene->fetchResults(true);
 		for (auto& obj : _objects) {
-			obj.updateSimulateResult();
+			obj->updateSimulateResult();
 		}
 	}
 #endif
@@ -57,57 +57,59 @@ void World::render() {
 	_view = _camera.getViewMatrix();
 
 	/* For Each Object: Get Model Matrix and Shade */
-	// Use Global Shader for now
+	// Use Global Shader for Now as a Makeshift
 	_global_shader->begin();
 
 	_global_shader->setMat4f("view", glm::value_ptr(_view));
 	_global_shader->setMat4f("projection", glm::value_ptr(_projection));
 	for (auto& obj : _objects) {
-		//_model = obj.getModelMatrix();
-		//_global_shader->setMat4f("model", glm::value_ptr(_model));
-		//_norm_model = obj.getNormModelMatrix();
-		//_global_shader->setMat4f("normModel", glm::value_ptr(_norm_model));
-		obj.draw(_global_shader);
+		obj->draw(_global_shader);
 	}
 
 	_global_shader->end();
 }
 
 void World::initObjects() {
-	// Load Shader & Model
+	/* Load Shader& Model */
 	_global_shader = std::make_shared<Shader>(
 		"assets/shaders/loadobj_nolight.vert", 
 		"assets/shaders/loadobj_nolight.frag"
 	);
+
+	auto ground = std::make_shared<Model>("assets/objects/ground/ground.obj");
+	auto avatar = std::make_shared<Model>("assets/objects/darknight/darknight.fbx");
 	
 	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");
 	auto box = std::make_shared<Model>("assets/objects/box/box_resize.obj");
 	auto barrels = std::make_shared<Model>("assets/objects/barrelpack/barrels_packed.obj");
 	//auto vampire = std::make_shared<Model>("assets/objects/vampire/dancing_vampire.dae");
 	auto knight = std::make_shared<Model>("assets/objects/knightguard/Knighty92-onlyman.fbx");
-	auto avatar = std::make_shared<Model>("assets/objects/darknight/darknight.fbx");
+	/* Debug */
+	// knight->printMesh();
 
-	/* debug */
-	//knight->printMesh();
+	/* Create Ground */
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, ground));
+	
+	/* Create Player */
+	_player = std::make_shared<Player>(_global_shader, avatar);
+	_objects.push_back(_player);
 
-	// Create Objects
-	glm::mat4 model_transform[] = {
-		// Location					 // Scale
-		createModelMatrix(glm::vec3(-1.0f, 0.0f, 0.0f)),
-		createModelMatrix(glm::vec3(3.0f, 0.0f, -4.0f)),
-		createModelMatrix(glm::vec3(2.0f, 0.0f, -6.0f)),
-		createModelMatrix(glm::vec3(-2.0f, 0.0f, -1.0f)/*, glm::vec3(0.5f)*/),
+	/* Create Objects */
+	glm::mat4 model_transform[] = {  // Location		// Scale
+		createModelMatrix(glm::vec3(-1.0f, 0.0f,  0.0f)),
+		createModelMatrix(glm::vec3( 3.0f, 0.0f, -4.0f)),
+		createModelMatrix(glm::vec3( 2.0f, 0.0f, -6.0f)),
 		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f), glm::vec3(0.7f))
 	};
-	_objects.emplace_back(_global_shader, barrel, model_transform[0]);
-	_objects.emplace_back(_global_shader, box   , model_transform[1]);
-	_objects.emplace_back(_global_shader, barrels, model_transform[2]);
-	_objects.emplace_back(_global_shader, avatar, model_transform[3]);
-	_objects.emplace_back(_global_shader, knight, model_transform[4]);
 
-	// init Objects Physics
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, model_transform[0]));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, box   , model_transform[1]));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2]));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3]));
+
+	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
-	auto barrel_actor = _objects[0].createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
+	auto barrel_actor = _objects[2]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
 	mScene->addActor(*barrel_actor);
 #endif
 }
@@ -165,15 +167,29 @@ void World::initPhysics() {
 
 
 /*=== Interact ===*/
+void World::processKeyboardPress() {
+	if (keyboard[GLFW_KEY_W] || keyboard[GLFW_KEY_S] || keyboard[GLFW_KEY_A] || keyboard[GLFW_KEY_D]) {
+		_player->walk();
+	}
+}
+
 void World::processKeyboardInput() {
-	if (keyboard[GLFW_KEY_W]) _camera.processKeyboard(FORWARD, _delta_time);
-	if (keyboard[GLFW_KEY_S]) _camera.processKeyboard(BACKWARD, _delta_time);
-	if (keyboard[GLFW_KEY_A]) _camera.processKeyboard(LEFT, _delta_time);
-	if (keyboard[GLFW_KEY_D]) _camera.processKeyboard(RIGHT, _delta_time);
+	//if (keyboard[GLFW_KEY_W]) _camera.processKeyboard(FORWARD, _delta_time);
+	//if (keyboard[GLFW_KEY_S]) _camera.processKeyboard(BACKWARD, _delta_time);
+	//if (keyboard[GLFW_KEY_A]) _camera.processKeyboard(LEFT, _delta_time);
+	//if (keyboard[GLFW_KEY_D]) _camera.processKeyboard(RIGHT, _delta_time);
+	_player->processKeyboard(_delta_time);
+	_camera.processKeyboard(_delta_time);
+}
+
+void World::processKeyboardRelease() {
+	if (!keyboard[GLFW_KEY_W] && !keyboard[GLFW_KEY_S] && !keyboard[GLFW_KEY_A] && !keyboard[GLFW_KEY_D]) {
+		_player->idle();
+	}
 }
 
 void World::processMouseMovement(float xoffset, float yoffset) {
-	_camera.processMouseMovement(xoffset, yoffset, true);
+	//_camera.processMouseMovement(xoffset, yoffset, true);
 }
 
 void World::processMouseScroll(float yoffset) {

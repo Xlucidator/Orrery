@@ -16,7 +16,7 @@ public:
 
 	void init(std::shared_ptr<Animation> played_animation);
 	void update(float delta_time);
-	
+	void reset();
 
 	void calculateBoneTransformRecursive(const AssimpNodeData* node, glm::mat4 parent_transform);
 	

@@ -3,6 +3,8 @@
 
 #include "common.h"
 #include "world/Object.h"
+#include "world/Player.h"
+
 #include "camera/Camera.h"
 #include "shader/Shader.h"
 #include "model/Model.h"
@@ -28,13 +30,16 @@ public:
 	void render();
 
 	/*=== Interact ===*/
+	void processKeyboardPress();
 	void processKeyboardInput();
+	void processKeyboardRelease();
 	void processMouseMovement(float xoffset, float yoffset);
 	void processMouseScroll(float yoffset);
 
 private:
 	/*=== Object ===*/
-	std::vector<Object> _objects;
+	std::shared_ptr<Player> _player = nullptr;
+	std::vector<std::shared_ptr<Object>> _objects;
 
 	/*=== Camera ===*/
 	Camera _camera;

@@ -28,6 +28,13 @@ void Animator::update(float delta_time) {
 	}
 }
 
+void Animator::reset() {
+	if (_current_animation) {
+		_current_time = 0.0f;
+		calculateBoneTransformRecursive(&_current_animation->getRootNode(), glm::mat4(1.0f));
+	}
+}
+
 void Animator::calculateBoneTransformRecursive(const AssimpNodeData* node, glm::mat4 parent_transform) {
 	const std::string& node_name = node->name;
 	glm::mat4 node_transform = node->transform; // init

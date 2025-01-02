@@ -4,15 +4,14 @@
 #include <vector>
 
 Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 model_matrix) {
-	_type = MODEL;
 	_model = model;
 	_shader = shader;
 
-	_model_matrix = model_matrix; // glm::mat4(1.0f);
+	_model_matrix = model_matrix;
 	updateNormModelMatrix();
 	// in details
 	_position = glm::vec3(model_matrix[3][0], model_matrix[3][1], model_matrix[3][2]);
-	_scale = 1.0f;
+	_scale = 1.0f; // TODO: has not handle Scale
 	glm::mat3 rotate_mat = glm::mat3(model_matrix);
 	//rotate_mat = glm::normalize(rotate_mat);
 	_rotation = glm::quat_cast(rotate_mat);
@@ -36,8 +35,8 @@ void Object::draw(std::shared_ptr<Shader>& shader) {
 	_model->draw(shader.get());
 }
 
-void Object::update(std::shared_ptr<Shader>& shader) {
-
+void Object::update(float _delta_time) {
+	animator->update(_delta_time);
 }
 
 void Object::render(glm::vec3& view, glm::vec3& projection) { // DO NOT USE
@@ -47,10 +46,6 @@ void Object::render(glm::vec3& view, glm::vec3& projection) { // DO NOT USE
 	_model->draw(_shader.get());
 
 	_shader->end();
-}
-
-inline void Object::updateNormModelMatrix() {
-	_norm_model_matrix = glm::transpose(glm::inverse(glm::mat3(_model_matrix)));
 }
 
 
