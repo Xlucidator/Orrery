@@ -15,14 +15,14 @@ class Player : public Object {
 public:
 	Player() = default;
 	Player(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, float activity_range, glm::mat4 model_matrix)
-			: Object(shader, model, model_matrix), _activity_range(activity_range) {
+			: Object(shader, model, model_matrix, DYNAMIC), _activity_range(activity_range) {
 		animator->reset();
 	}
 	Player(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, float activity_range,
 		glm::vec3 position = glm::vec3(0.0f), float scale = 1.0f,
 		glm::vec3 front = glm::vec3(0.0f, 0.0f, 1.0f),
 		glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f))
-		: Object(shader, model, position, scale, front, world_up), _activity_range(activity_range) {
+		: Object(shader, model, DYNAMIC, position, scale, front, world_up), _activity_range(activity_range) {
 		animator->reset();
 	}
 	~Player() {}

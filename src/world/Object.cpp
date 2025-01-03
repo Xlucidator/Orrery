@@ -6,8 +6,9 @@
 #include <vector>
 
 // Can be Redundant and Silly
-Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 raw_model_matrix, float scale)
-		: _model(model), _shader(shader),
+Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 raw_model_matrix, PXType px_type, 
+		float scale)
+		: _model(model), _shader(shader), px_type(px_type),
 		  _scale(scale) {
 
 	_model_matrix = glm::scale(raw_model_matrix, glm::vec3(_scale));
@@ -23,7 +24,7 @@ Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm
 }
 
 // Has Defect: need to use quat to eliminate
-Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model,
+Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, PXType px_type,
 		glm::vec3 position, float scale, glm::vec3 front, glm::vec3 world_up)
 		: _model(model), _shader(shader),
 		  _position(position), _scale(scale), _front(front), _world_up(world_up) {
@@ -36,7 +37,7 @@ Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model,
 	/* Calculate Matrices: temporarily */
 	_model_matrix = createModelMatrix(_position, _front, _up, _right, glm::vec3(_scale));
 	updateNormModelMatrix();
-	_rotation = glm::quat_cast(glm::mat3(_right, _up, _front)); // TODO: check, whether _front or -_front
+	_rotation = glm::quat_cast(glm::mat3(_right, _up, _front));
 
 	/* Set Animator */
 	animator = std::make_shared<Animator>(model->animation);
@@ -163,10 +164,12 @@ void Object::updateSimulateResult() {
 	physx::PxTransform px_new_transform = rigid_dynamic->getGlobalPose();
 	if (px_new_transform == _px_transform) return;
 
-	std::cout << "[Player][prev px_transform]" << std::endl;
-	printPxTransform(_px_transform);
-	std::cout << "[Player][new  px_transform]" << std::endl;
-	printPxTransform(px_new_transform);
+#ifdef DEBUG
+	//std::cout << "[Player][prev px_transform]" << std::endl;
+	//printPxTransform(_px_transform);
+	//std::cout << "[Player][new  px_transform]" << std::endl;
+	//printPxTransform(px_new_transform);
+#endif
 
 	_px_transform = px_new_transform;
 	// convert to glm positon and rotate

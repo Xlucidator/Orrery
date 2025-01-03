@@ -12,9 +12,9 @@
 class Object {
 public:
 	Object() {}
-	Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 raw_model_matrix,
+	Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 raw_model_matrix, PXType px_type,
 		float scale = 1.0f);
-	Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, 
+	Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, PXType px_type,
 		glm::vec3 position = glm::vec3(0.0f), float scale = 1.0f,
 		glm::vec3 front = glm::vec3(0.0f, 0.0f, 1.0f), 
 		glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f));

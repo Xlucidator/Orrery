@@ -104,10 +104,10 @@ void World::initObjects() {
 	// knight->printMesh();
 
 	/* Create Ground */
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, ground));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, ground, STATIC));
 	
 	/* Create Player */
-	_player = std::make_shared<Player>(_global_shader, avatar, _border);
+	_player = std::make_shared<Player>(_global_shader, avatar, _border); // Must be Dynamic
 	_objects.push_back(_player);
 	_camera.followAt(_player);
 
@@ -119,13 +119,13 @@ void World::initObjects() {
 		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f))
 	};
 
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, 
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, DYNAMIC,
 		glm::vec3(-4.0f, 0.5f, 0.0f), 1.0f, glm::vec3(0.0f, -1.0f, 0.2f)
 	));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, box   , model_transform[1]));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2]));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, box   , model_transform[1], STATIC));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2], STATIC));
 	//_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], 0.7f));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, ruins, 
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, ruins, STATIC,
 		glm::vec3(-20.0f, 0.0f, 10.0f), 1.0f, glm::vec3(1.0f, 0.0f, 0.0f)
 	));
 
@@ -148,13 +148,16 @@ void World::initObjects() {
 	
 	// Other Objects
 	auto barrel_actor = _objects[2]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
-	//barrel_actor->setMassSpaceInertiaTensor(physx::PxVec3(0.0f, 0.0f, 0.5f));
-	//barrel_actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 	barrel_actor->setMass(5.0f);
 	barrel_actor->setCMassLocalPose(physx::PxTransform(0.0f, 0.7f, 0.0f));
 	mScene->addActor(*barrel_actor);
 
-	for (int i = 3; i < _objects.size(); i++);
+	//auto box_actor = _objects[2]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
+	//mScene->addActor(*box_actor);
+
+	for (int i = 3; i < _objects.size(); i++) {
+
+	}
 #endif
 }
 
