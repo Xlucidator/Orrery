@@ -98,7 +98,7 @@ void World::initObjects() {
 	auto box = std::make_shared<Model>("assets/objects/box/box_resize.obj");
 	auto barrels = std::make_shared<Model>("assets/objects/barrelpack/barrels_packed.obj");
 	//auto vampire = std::make_shared<Model>("assets/objects/vampire/dancing_vampire.dae");
-	auto knight = std::make_shared<Model>("assets/objects/knightguard/Knighty92-onlyman.fbx");
+	//auto knight = std::make_shared<Model>("assets/objects/knightguard/Knighty92-onlyman.fbx");
 	auto ruins = std::make_shared<Model>("assets/objects/ruins/Ruins-Pillars-Arch.obj");
 	/* Debug */
 	// knight->printMesh();
@@ -120,21 +120,21 @@ void World::initObjects() {
 	};
 
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, 
-		glm::vec3(-1.0f, 2.0f, 0.0f), 1.0f
+		glm::vec3(-4.0f, 0.5f, 0.0f), 1.0f, glm::vec3(0.0f, -1.0f, 0.2f)
 	));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, box   , model_transform[1]));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2]));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], 0.7f));
+	//_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], 0.7f));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, ruins, 
-		glm::vec3(-15.0f, 0.0f, 10.0f), 1.0f, glm::vec3(1.0f, 0.0f, 1.0f)
+		glm::vec3(-20.0f, 0.0f, 10.0f), 1.0f, glm::vec3(1.0f, 0.0f, 0.0f)
 	));
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
 	// Ground
-	physx::PxRigidStatic* ground_plane = mPhysics->createRigidStatic(physx::PxTransform(0.0f, -0.2f, 0.0f));
+	physx::PxRigidStatic* ground_plane = mPhysics->createRigidStatic(physx::PxTransform(0.0f, -0.5f, 0.0f));
 	{
-		physx::PxShape* ground_shape = mPhysics->createShape(physx::PxBoxGeometry(50.0f, 0.4f, 50.0f), *mMaterial);
+		physx::PxShape* ground_shape = mPhysics->createShape(physx::PxBoxGeometry(50.0f, 0.5f, 50.0f), *mMaterial);
 		ground_plane->attachShape(*ground_shape);
 		ground_shape->release();
 	}
@@ -148,10 +148,13 @@ void World::initObjects() {
 	
 	// Other Objects
 	auto barrel_actor = _objects[2]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
-	barrel_actor->setMassSpaceInertiaTensor(physx::PxVec3(0.0f, 0.0f, 0.5f));
-	barrel_actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
-	barrel_actor->setMass(0.1f);
+	//barrel_actor->setMassSpaceInertiaTensor(physx::PxVec3(0.0f, 0.0f, 0.5f));
+	//barrel_actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+	barrel_actor->setMass(5.0f);
+	barrel_actor->setCMassLocalPose(physx::PxTransform(0.0f, 0.7f, 0.0f));
 	mScene->addActor(*barrel_actor);
+
+	for (int i = 3; i < _objects.size(); i++);
 #endif
 }
 

@@ -5,6 +5,7 @@
 
 #include <vector>
 
+// Can be Redundant and Silly
 Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm::mat4 raw_model_matrix, float scale)
 		: _model(model), _shader(shader),
 		  _scale(scale) {
@@ -21,16 +22,18 @@ Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model, glm
 	animator = std::make_shared<Animator>(model->animation);
 }
 
+// Has Defect: need to use quat to eliminate
 Object::Object(std::shared_ptr<Shader> shader, std::shared_ptr<Model> model,
 		glm::vec3 position, float scale, glm::vec3 front, glm::vec3 world_up)
 		: _model(model), _shader(shader),
 		  _position(position), _scale(scale), _front(front), _world_up(world_up) {
 	
+	// Never use this again in the following calculation, using Quat instead
 	_front = glm::normalize(front); // assume world_up to be normalized
 	_right = glm::normalize(glm::cross(_front, _world_up));
 	_up = glm::normalize(glm::cross(_right, _front));
 
-	/* Calculate Matrices */
+	/* Calculate Matrices: temporarily */
 	_model_matrix = createModelMatrix(_position, _front, _up, _right, glm::vec3(_scale));
 	updateNormModelMatrix();
 	_rotation = glm::quat_cast(glm::mat3(_right, _up, _front)); // TODO: check, whether _front or -_front
@@ -134,7 +137,6 @@ physx::PxRigidDynamic* Object::createRigidDynamic(physx::PxPhysics* physics, phy
 	}
 	rigid_dynamic->setLinearDamping(0.01f);
 	rigid_dynamic->setAngularDamping(0.5f);
-	//rigid_dynamic->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	rigid_dynamic->setSleepThreshold(0.05f);
 	return rigid_dynamic;
 }
@@ -161,15 +163,16 @@ void Object::updateSimulateResult() {
 	physx::PxTransform px_new_transform = rigid_dynamic->getGlobalPose();
 	if (px_new_transform == _px_transform) return;
 
-	std::cout << "[previous model_mat]\n" << glm::to_string(_model_matrix) << std::endl;
+	std::cout << "[Player][prev px_transform]" << std::endl;
+	printPxTransform(_px_transform);
+	std::cout << "[Player][new  px_transform]" << std::endl;
+	printPxTransform(px_new_transform);
 
 	_px_transform = px_new_transform;
 	// convert to glm positon and rotate
 	_position = glm::vec3(_px_transform.p.x, _px_transform.p.y, _px_transform.p.z);
 	_rotation = glm::quat(_px_transform.q.w, _px_transform.q.x, _px_transform.q.y, _px_transform.q.z);
 	// finally update model matrix and norm model matrix
-	_model_matrix = glm::translate(glm::mat4_cast(_rotation), _position);
+	_model_matrix = createModelMatrix(_position, _rotation, glm::vec3(_scale));
 	updateNormModelMatrix();
-
-	std::cout << "[new model_mat]\n" << glm::to_string(_model_matrix) << std::endl;
 }

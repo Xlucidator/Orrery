@@ -54,7 +54,7 @@ public:
 	virtual physx::PxRigidDynamic* createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
 	void setActorFlag(physx::PxActorFlag::Enum flag, bool value);
 	void setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value);
-	void updateSimulateResult();
+	virtual void updateSimulateResult();
 
 	/* Animator: Drive Animation */
 	std::shared_ptr<Animator> animator = nullptr;

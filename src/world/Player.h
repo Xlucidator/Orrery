@@ -43,11 +43,16 @@ public:
 
 	/* Physics */
 	physx::PxRigidDynamic* Player::createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material) override;
+	void updateSimulateResult() override;
 
 protected:
 	PlayerStatus _status = PLAYER_IDLE;
-	float _movement_speed = 5.0f;
+	float _movement_speed = 4.0f;
 	float _activity_range = 50.f;
+
+	/* Physics */
+	float _aabb_hy = 3.0f;
+
 	inline void limiting() {
 		if (_position.x < -_activity_range) _position.x = -_activity_range;
 		if (_position.x >  _activity_range) _position.x =  _activity_range;
