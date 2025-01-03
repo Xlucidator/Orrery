@@ -100,7 +100,7 @@ void World::initObjects() {
 	auto box = std::make_shared<Model>("assets/objects/box/box_resize.obj");
 	auto barrels = std::make_shared<Model>("assets/objects/barrelpack/barrels_packed.obj");
 	//auto vampire = std::make_shared<Model>("assets/objects/vampire/dancing_vampire.dae");
-	//auto knight = std::make_shared<Model>("assets/objects/knightguard/Knighty92-onlyman.fbx");
+	auto knight = std::make_shared<Model>("assets/objects/knightguard/Knighty92-onlyman.fbx");
 	auto ruins = std::make_shared<Model>("assets/objects/ruins/Ruins-Pillars-Arch.obj");
 	/* Debug */
 	// knight->printMesh();
@@ -128,7 +128,7 @@ void World::initObjects() {
 		glm::vec3(3.0f, 0.0f, -4.0f), 1.0f
 	));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2], STATIC));
-	//_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], 0.7f));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], STATIC, 0.7f));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, ruins, STATIC,
 		glm::vec3(-20.0f, 0.0f, 10.0f), 1.0f, glm::vec3(1.0f, 0.0f, 0.0f)
 	));
