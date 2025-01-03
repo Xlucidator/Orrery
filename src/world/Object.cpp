@@ -54,6 +54,13 @@ void Object::draw(std::shared_ptr<Shader>& shader) {
 	_model->draw(shader.get());
 }
 
+void Object::start() {
+	if (px_type == DYNAMIC) {
+		std::cout << "object: enable gravity" << std::endl;
+		rigid_dynamic->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, false);
+	}
+}
+
 void Object::update(float _delta_time) {
 	animator->update(_delta_time);
 }
@@ -125,6 +132,10 @@ physx::PxRigidDynamic* Object::createRigidDynamic(physx::PxPhysics* physics, phy
 		rigid_dynamic->attachShape(*shape);
 		shape->release();
 	}
+	rigid_dynamic->setLinearDamping(0.01f);
+	rigid_dynamic->setAngularDamping(0.5f);
+	rigid_dynamic->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+	rigid_dynamic->setSleepThreshold(0.05f);
 	return rigid_dynamic;
 }
 
@@ -146,10 +157,13 @@ void Object::setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value) { /
 void Object::updateSimulateResult() {
 	if (px_type != DYNAMIC) return;
 	
-	std::cout << "[previous model_mat] " << glm::to_string(_model_matrix) << std::endl;
-
 	// update PxTransform
-	rigid_dynamic->getGlobalPose();
+	physx::PxTransform px_new_transform = rigid_dynamic->getGlobalPose();
+	if (px_new_transform == _px_transform) return;
+
+	std::cout << "[previous model_mat]\n" << glm::to_string(_model_matrix) << std::endl;
+
+	_px_transform = px_new_transform;
 	// convert to glm positon and rotate
 	_position = glm::vec3(_px_transform.p.x, _px_transform.p.y, _px_transform.p.z);
 	_rotation = glm::quat(_px_transform.q.w, _px_transform.q.x, _px_transform.q.y, _px_transform.q.z);
@@ -157,5 +171,5 @@ void Object::updateSimulateResult() {
 	_model_matrix = glm::translate(glm::mat4_cast(_rotation), _position);
 	updateNormModelMatrix();
 
-	std::cout << "[new model_mat] " << glm::to_string(_model_matrix) << std::endl;
+	std::cout << "[new model_mat]\n" << glm::to_string(_model_matrix) << std::endl;
 }

@@ -41,6 +41,7 @@ int main() {
     APP->setMouseScrollCallback(onMouseScroll);
    
     /* Window Loop */
+    world.start();
     while (APP->update()) {
         world.update();
         world.render();

@@ -17,16 +17,20 @@ class World {
 public:
 	World();
 	~World() {
-		if (mCookingParams) { delete mCookingParams; std::cout << "Cleared mCookingParams" << std::endl; }
-		if (mMaterial)	{ mMaterial->release(); std::cout << "Cleared mMaterial" << std::endl; }
-		if (mScene)		{ mScene->release(); std::cout << "Cleared mScene" << std::endl; }
-		if (mPhysics) { mPhysics->release(); std::cout << "Cleared mPhysics" << std::endl; }
-		if (mDispatcher) { mDispatcher->release(); std::cout << "Cleared mDispatcher" << std::endl; }
+		// Must in order
+		if (mCookingParams) { delete mCookingParams;	mCookingParams = nullptr;	std::cout << "Cleared mCookingParams" << std::endl; }
+		if (mMaterial)		{ mMaterial->release();		mMaterial = nullptr;		std::cout << "Cleared mMaterial" << std::endl; }
+		if (mScene)			{ mScene->release();		mScene = nullptr;			std::cout << "Cleared mScene" << std::endl; }
+		if (mPhysics)		{ mPhysics->release();		mPhysics = nullptr;			std::cout << "Cleared mPhysics" << std::endl; }
+		if (mDispatcher)	{ mDispatcher->release();	mDispatcher = nullptr;		std::cout << "Cleared mDispatcher" << std::endl; }
+		
 		// Must be the Last One
-		if (mFoundation) { mFoundation->release(); std::cout << "Cleared mFoundation" << std::endl; }
+		if (mPvd)			{ mPvd->release();			mPvd = nullptr;				std::cout << "Cleared mPvd" << std::endl; } // Not used
+		if (mFoundation)	{ mFoundation->release();	mFoundation = nullptr;		std::cout << "Cleared mFoundation" << std::endl; }
 	}
 
 	void init();
+	void start();
 	void update();
 	void render();
 
@@ -64,19 +68,21 @@ private:
 	// PhysX Variables
 	physx::PxDefaultAllocator		mAllocator;
 	physx::PxDefaultErrorCallback	mErrorCallback;
-	physx::PxDefaultCpuDispatcher*	mDispatcher = nullptr;
-	physx::PxTolerancesScale		mToleranceScale;
-
 	physx::PxFoundation*			mFoundation = nullptr;
-	physx::PxPhysics*				mPhysics = nullptr;
+	physx::PxPvd*					mPvd = nullptr;
+	physx::PxDefaultCpuDispatcher*	mDispatcher = nullptr;
 	
-	physx::PxScene*					mScene = nullptr;
-	physx::PxMaterial*				mMaterial = nullptr;
+	physx::PxTolerancesScale		mToleranceScale;
+	physx::PxPhysics*				mPhysics = nullptr;
 	physx::PxCookingParams*			mCookingParams = nullptr;  // no more PxCooking
 	
-	//physx::PxPvd*					mPvd = nullptr;
-
-	/*=== Audio ===*/
+	physx::PxScene*					mScene = nullptr;
+	//physx::PxPvdSceneClient*		mPvdClient = nullptr;
+	physx::PxMaterial*				mMaterial = nullptr;
+	
+	/* Utils */
+	bool need_start = true;
+	bool first_start = true;
 
 	void initPhysics();
 	void initObjects();

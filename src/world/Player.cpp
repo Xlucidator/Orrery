@@ -52,3 +52,24 @@ void Player::processMouseScroll(float yoffset) {
 
 }
 
+
+physx::PxRigidDynamic* Player::createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material) {
+	cookAndCreateTriangleMesh(physics, cookingParams);
+
+	px_type = DYNAMIC;
+	_px_transform = physx::PxTransform(
+		physx::PxVec3(_position.x, _position.y, _position.z),
+		physx::PxQuat(_rotation.x, _rotation.y, _rotation.z, _rotation.w)
+	);
+	rigid_dynamic = physics->createRigidDynamic(_px_transform);
+	{
+		physx::PxShape* shape = physics->createShape(physx::PxTriangleMeshGeometry(px_triangle_mesh), *material);
+		rigid_dynamic->attachShape(*shape);
+		shape->release();
+	}
+	rigid_dynamic->setLinearDamping(0.01f);
+	rigid_dynamic->setAngularDamping(0.5f);
+	rigid_dynamic->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+	rigid_dynamic->setSleepThreshold(0.05f);
+	return rigid_dynamic;
+}

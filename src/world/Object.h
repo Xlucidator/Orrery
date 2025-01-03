@@ -19,13 +19,15 @@ public:
 		glm::vec3 front = glm::vec3(0.0f, 0.0f, 1.0f), 
 		glm::vec3 world_up = glm::vec3(0.0f, 1.0f, 0.0f));
 	~Object() {
-		if (rigid_static) { rigid_static->release(); }
-		if (rigid_dynamic) { rigid_dynamic->release();  }
-		if (px_triangle_mesh) { px_triangle_mesh->release(); }
+		// mScene would have release this (make sure attached to mScene)
+		//if (rigid_static) { rigid_static->release(); std::cout << "Cleared rigid_static" << std::endl; }
+		//if (rigid_dynamic) { rigid_dynamic->release(); std::cout << "Cleared rigid_dynamic" << std::endl; }
+		//if (px_triangle_mesh) { px_triangle_mesh->release(); std::cout << "Cleared px_triangle_mesh" << std::endl; }
 	}
 
 	void render(glm::vec3& view, glm::vec3& projection); // TODO: whether render here or out
 	void draw(std::shared_ptr<Shader>& shader);
+	void start();
 	virtual void update(float _delta_time);
 
 	void setModelMatrix(glm::mat4 model) { 
@@ -48,7 +50,7 @@ public:
 	physx::PxRigidStatic* rigid_static = nullptr;
 	physx::PxRigidDynamic* rigid_dynamic = nullptr;
 	physx::PxRigidStatic* createRigidStatic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
-	physx::PxRigidDynamic* createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
+	virtual physx::PxRigidDynamic* createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
 	void setActorFlag(physx::PxActorFlag::Enum flag, bool value);
 	void setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value);
 	void updateSimulateResult();

@@ -26,6 +26,17 @@ void World::init() {
 	sound_engine->play2D("assets/audios/Skeleton_A_Bloody_Labyrinth.mp3", true);
 }
 
+void World::start() {
+#ifdef PHYSIC_IMPL
+	for (auto& obj : _objects) {
+		obj->start();
+	}
+#endif // PHYSIC_IMPL
+
+	// important! or the first _delta_time would be extremely large
+	_last_frame = static_cast<float>(glfwGetTime());
+}
+
 void World::update() {
 	/* Calculate time */
 	float current_frame = static_cast<float>(glfwGetTime());
@@ -101,14 +112,16 @@ void World::initObjects() {
 
 	/* Create Objects */
 	glm::mat4 model_transform[] = {  // Location		// Scale
-		createModelMatrix(glm::vec3(-1.0f, 5.0f,  0.0f)),
+		createModelMatrix(glm::vec3(-1.0f, 2.0f,  0.0f)),
 		createModelMatrix(glm::vec3( 3.0f, 0.0f, -4.0f)),
 		createModelMatrix(glm::vec3( 2.0f, 0.0f, -6.0f)),
 		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f))
 	};
 
 
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, model_transform[0]));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, 
+		glm::vec3(-1.0f, 2.0f, 0.0f), 1.0f
+	));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, box   , model_transform[1]));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2]));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], 0.7f));
@@ -118,16 +131,21 @@ void World::initObjects() {
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
-	//physx::PxRigidStatic* ground_plane = physx::PxCreatePlane(*mPhysics, physx::PxPlane(0.0f, 1.0f, 0.0f, 1.0f), *mMaterial);
-	//_objects[0]->rigid_static = ground_plane;
-	//mScene->addActor(*ground_plane);
-	//
-	//auto barrel_actor = _objects[2]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
-	//barrel_actor->setLinearDamping(0.005f);
-	//barrel_actor->setMassSpaceInertiaTensor(physx::PxVec3(0.0f, 0.0f, 0.5f));
-	//barrel_actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
-	//barrel_actor->setMass(10.0f);
-	//mScene->addActor(*barrel_actor);
+	physx::PxRigidStatic* ground_plane = mPhysics->createRigidStatic(physx::PxTransform(physx::PxQuat(physx::PxIdentity)));
+	{
+		physx::PxShape* ground_shape = mPhysics->createShape(physx::PxPlaneGeometry(), *mMaterial);
+		ground_plane->attachShape(*ground_shape);
+		ground_shape->release();
+	}
+	_objects[0]->rigid_static = ground_plane;
+	_objects[0]->px_type = STATIC;
+	mScene->addActor(*ground_plane);
+	
+	auto barrel_actor = _objects[2]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
+	barrel_actor->setMassSpaceInertiaTensor(physx::PxVec3(0.0f, 0.0f, 0.5f));
+	barrel_actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+	barrel_actor->setMass(0.1f);
+	mScene->addActor(*barrel_actor);
 #endif
 }
 
@@ -157,7 +175,7 @@ void World::initPhysics() {
 
 	// Creat SceneDesc
 	physx::PxSceneDesc scene_desc(mPhysics->getTolerancesScale());
-	scene_desc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+	scene_desc.gravity = physx::PxVec3(0.0f, -1.981f, 0.0f);
 
 	// Create CPU Dispatcher
 	mDispatcher = physx::PxDefaultCpuDispatcherCreate(2);

@@ -41,6 +41,9 @@ public:
 		updateNormModelMatrix();
 	}
 
+	/* Physics */
+	physx::PxRigidDynamic* Player::createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material) override;
+
 protected:
 	PlayerStatus _status = PLAYER_IDLE;
 	float _movement_speed = 5.0f;
