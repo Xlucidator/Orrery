@@ -42,6 +42,9 @@ public:
 	void processMouseScroll(float yoffset);
 
 private:
+	/*=== World ===*/
+	float _border = 30.0f;
+
 	/*=== Object ===*/
 	std::shared_ptr<Player> _player = nullptr;
 	std::vector<std::shared_ptr<Object>> _objects;

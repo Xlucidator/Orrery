@@ -107,8 +107,9 @@ void World::initObjects() {
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, ground));
 	
 	/* Create Player */
-	_player = std::make_shared<Player>(_global_shader, avatar);
+	_player = std::make_shared<Player>(_global_shader, avatar, _border);
 	_objects.push_back(_player);
+	_camera.followAt(_player);
 
 	/* Create Objects */
 	glm::mat4 model_transform[] = {  // Location		// Scale
@@ -117,7 +118,6 @@ void World::initObjects() {
 		createModelMatrix(glm::vec3( 2.0f, 0.0f, -6.0f)),
 		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f))
 	};
-
 
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, 
 		glm::vec3(-1.0f, 2.0f, 0.0f), 1.0f
@@ -131,7 +131,8 @@ void World::initObjects() {
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
-	physx::PxRigidStatic* ground_plane = mPhysics->createRigidStatic(physx::PxTransform(physx::PxVec3(0.0f, -0.2f, 0.0f), physx::PxQuat(physx::PxIdentity)));
+	// Ground
+	physx::PxRigidStatic* ground_plane = mPhysics->createRigidStatic(physx::PxTransform(0.0f, -0.2f, 0.0f));
 	{
 		physx::PxShape* ground_shape = mPhysics->createShape(physx::PxBoxGeometry(50.0f, 0.4f, 50.0f), *mMaterial);
 		ground_plane->attachShape(*ground_shape);
@@ -140,7 +141,12 @@ void World::initObjects() {
 	_objects[0]->rigid_static = ground_plane;
 	_objects[0]->px_type = STATIC;
 	mScene->addActor(*ground_plane);
+
+	// Player
+	auto player = _player->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
+	mScene->addActor(*player);
 	
+	// Other Objects
 	auto barrel_actor = _objects[2]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
 	barrel_actor->setMassSpaceInertiaTensor(physx::PxVec3(0.0f, 0.0f, 0.5f));
 	barrel_actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);

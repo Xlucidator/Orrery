@@ -2,6 +2,8 @@
 #include "Camera.h"
 #include "utils.h"
 
+#include <assert.h>
+
 Camera::Camera(glm::vec3 pos, glm::vec3 wup, float yaw, float pitch):
 		position(pos), world_up(wup), yaw(yaw), pitch(pitch),
 		front(glm::vec3(0.0f, 0.0f, -1.0f)), // reverse to direction
@@ -11,8 +13,23 @@ Camera::Camera(glm::vec3 pos, glm::vec3 wup, float yaw, float pitch):
 }
 
 
+void Camera::followAt(std::shared_ptr<Object> obj) {
+	assert(obj != nullptr);
+	_status = CAMERA_FOLLOW;
+	_followed_object = obj;
+	_followed_offset = position - _followed_object->getPosition();
+}
+
+
 /* Camera Movement */
+// TODO: can be clearer, seperate input semantics with movement semantics
 void Camera::processKeyboard(/*Movement direction, */float delta_t) {
+	if (_status == CAMERA_FOLLOW) {
+		assert(obj != nullptr);
+		position = _followed_object->getPosition() + _followed_offset;
+		return ;
+	} 
+
 	float velocity = movement_speed * delta_t;
 
 	glm::vec3 pace = static_cast<float>(keyboard[GLFW_KEY_W]) * pace_vec[GLFW_KEY_W]

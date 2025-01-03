@@ -24,6 +24,7 @@ void Player::update(float _delta_time) {
 	if (_status == PLAYER_WALK) {
 		animator->update(_delta_time);
 	}
+	rigid_dynamic->setKinematicTarget(physx::PxTransform(_position.x, _position.y, _position.z));
 }
 
 
@@ -41,6 +42,7 @@ void Player::processKeyboard(float delta_time) {
 		pace = glm::normalize(pace);
 		_front = pace; // depend on createModelMactrix: front (not -front)
 		_position += pace * velocity;
+		limiting();
 	}
 
 }
@@ -68,9 +70,7 @@ physx::PxRigidDynamic* Player::createRigidDynamic(physx::PxPhysics* physics, phy
 		rigid_dynamic->attachShape(*shape);
 		shape->release();
 	}
-	rigid_dynamic->setLinearDamping(0.01f);
-	rigid_dynamic->setAngularDamping(0.5f);
-	rigid_dynamic->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
-	rigid_dynamic->setSleepThreshold(0.05f);
+	rigid_dynamic->setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true);
+	rigid_dynamic->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
 	return rigid_dynamic;
 }
