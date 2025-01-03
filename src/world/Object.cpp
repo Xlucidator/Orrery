@@ -134,7 +134,7 @@ physx::PxRigidDynamic* Object::createRigidDynamic(physx::PxPhysics* physics, phy
 	}
 	rigid_dynamic->setLinearDamping(0.01f);
 	rigid_dynamic->setAngularDamping(0.5f);
-	rigid_dynamic->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
+	//rigid_dynamic->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, true);
 	rigid_dynamic->setSleepThreshold(0.05f);
 	return rigid_dynamic;
 }

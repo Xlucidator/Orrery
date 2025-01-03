@@ -131,9 +131,9 @@ void World::initObjects() {
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
-	physx::PxRigidStatic* ground_plane = mPhysics->createRigidStatic(physx::PxTransform(physx::PxQuat(physx::PxIdentity)));
+	physx::PxRigidStatic* ground_plane = mPhysics->createRigidStatic(physx::PxTransform(physx::PxVec3(0.0f, -0.2f, 0.0f), physx::PxQuat(physx::PxIdentity)));
 	{
-		physx::PxShape* ground_shape = mPhysics->createShape(physx::PxPlaneGeometry(), *mMaterial);
+		physx::PxShape* ground_shape = mPhysics->createShape(physx::PxBoxGeometry(50.0f, 0.4f, 50.0f), *mMaterial);
 		ground_plane->attachShape(*ground_shape);
 		ground_shape->release();
 	}
@@ -175,7 +175,7 @@ void World::initPhysics() {
 
 	// Creat SceneDesc
 	physx::PxSceneDesc scene_desc(mPhysics->getTolerancesScale());
-	scene_desc.gravity = physx::PxVec3(0.0f, -1.981f, 0.0f);
+	scene_desc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
 
 	// Create CPU Dispatcher
 	mDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
@@ -202,6 +202,11 @@ void World::initPhysics() {
 void World::processKeyboardPress() {
 	if (is_wasd()) {
 		_player->walk();
+	}
+
+	// Debug: report postion
+	if (keyboard[GLFW_KEY_SPACE]) {
+		std::cout << "[Player Position] " << glm::to_string(_player->getPosition()) << std::endl;
 	}
 }
 

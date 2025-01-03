@@ -34,8 +34,9 @@ public:
 		_model_matrix = model;
 		updateNormModelMatrix();
 	}
-	glm::mat4 getModelMatrix() { return _model_matrix; }
-	glm::mat3 getNormModelMatrix() { return _norm_model_matrix; }
+	glm::mat4 getModelMatrix() const { return _model_matrix; }
+	glm::mat3 getNormModelMatrix() const { return _norm_model_matrix; }
+	glm::vec3 getPosition() const { return _position; }
 
 	/* Physics */
 	// PxActor

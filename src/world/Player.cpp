@@ -42,6 +42,7 @@ void Player::processKeyboard(float delta_time) {
 		_front = pace; // depend on createModelMactrix: front (not -front)
 		_position += pace * velocity;
 	}
+
 }
 
 void Player::processMouseMovement(float xoffset, float yoffset) {
