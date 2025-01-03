@@ -49,7 +49,8 @@ public:
 	physx::PxRigidDynamic* rigid_dynamic = nullptr;
 	physx::PxRigidStatic* createRigidStatic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
 	physx::PxRigidDynamic* createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
-	void setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value); // TODO: more clear
+	void setActorFlag(physx::PxActorFlag::Enum flag, bool value);
+	void setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value);
 	void updateSimulateResult();
 
 	/* Animator: Drive Animation */

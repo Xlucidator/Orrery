@@ -17,12 +17,13 @@ class World {
 public:
 	World();
 	~World() {
-		if (mCookingParams) delete mCookingParams;
-		if (mMaterial) mMaterial->release();
-		if (mScene) mScene->release();
-		if (mPhysics) mPhysics->release();
-		if (mFoundation) mFoundation->release();
-		if (mDispatcher) mDispatcher->release();
+		if (mCookingParams) { delete mCookingParams; std::cout << "Cleared mCookingParams" << std::endl; }
+		if (mMaterial)	{ mMaterial->release(); std::cout << "Cleared mMaterial" << std::endl; }
+		if (mScene)		{ mScene->release(); std::cout << "Cleared mScene" << std::endl; }
+		if (mPhysics) { mPhysics->release(); std::cout << "Cleared mPhysics" << std::endl; }
+		if (mDispatcher) { mDispatcher->release(); std::cout << "Cleared mDispatcher" << std::endl; }
+		// Must be the Last One
+		if (mFoundation) { mFoundation->release(); std::cout << "Cleared mFoundation" << std::endl; }
 	}
 
 	void init();

@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
 # pre-define
-add_definitions(-DDEBUG)
+add_definitions(-DDEBUG -DPHYSIC_IMPL)
 
 # include & link
 include_directories(
@@ -43,4 +43,5 @@ file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
 # dlls
 file(GLOB DLLS "${CMAKE_SOURCE_DIR}/thirdparty/dll/*.dll")
 file(COPY ${DLLS} DESTINATION ${CMAKE_BINARY_DIR})
-
+file(GLOB PDBS "${CMAKE_SOURCE_DIR}/thirdparty/dll/*.pdb")
+file(COPY ${PDBS} DESTINATION ${CMAKE_BINARY_DIR})

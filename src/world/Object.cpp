@@ -128,8 +128,17 @@ physx::PxRigidDynamic* Object::createRigidDynamic(physx::PxPhysics* physics, phy
 	return rigid_dynamic;
 }
 
-void Object::setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value) {
-	if (px_type == DYNAMIC) {
+void Object::setActorFlag(physx::PxActorFlag::Enum flag, bool value) { // TODO: silly
+	if (px_type == DYNAMIC && rigid_dynamic) {
+		rigid_dynamic->setActorFlag(flag, value);
+	}
+	else if (px_type == STATIC && rigid_static) {
+		rigid_static->setActorFlag(flag, value);
+	}
+}
+
+void Object::setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value) { // TODO: silly
+	if (px_type == DYNAMIC && rigid_dynamic) {
 		rigid_dynamic->setRigidBodyFlag(flag, value);
 	}
 }

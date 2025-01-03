@@ -101,7 +101,7 @@ void World::initObjects() {
 
 	/* Create Objects */
 	glm::mat4 model_transform[] = {  // Location		// Scale
-		createModelMatrix(glm::vec3(-1.0f, 0.0f,  0.0f)),
+		createModelMatrix(glm::vec3(-1.0f, 5.0f,  0.0f)),
 		createModelMatrix(glm::vec3( 3.0f, 0.0f, -4.0f)),
 		createModelMatrix(glm::vec3( 2.0f, 0.0f, -6.0f)),
 		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f))
@@ -113,13 +113,21 @@ void World::initObjects() {
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2]));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], 0.7f));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, ruins, 
-		glm::vec3(-15.0f, 0.0f, 3.0f), 1.0f, glm::vec3(1.0f, 0.0f, 1.0f)
+		glm::vec3(-15.0f, 0.0f, 10.0f), 1.0f, glm::vec3(1.0f, 0.0f, 1.0f)
 	));
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
-	auto barrel_actor = _objects[2]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
-	mScene->addActor(*barrel_actor);
+	//physx::PxRigidStatic* ground_plane = physx::PxCreatePlane(*mPhysics, physx::PxPlane(0.0f, 1.0f, 0.0f, 1.0f), *mMaterial);
+	//_objects[0]->rigid_static = ground_plane;
+	//mScene->addActor(*ground_plane);
+	//
+	//auto barrel_actor = _objects[2]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
+	//barrel_actor->setLinearDamping(0.005f);
+	//barrel_actor->setMassSpaceInertiaTensor(physx::PxVec3(0.0f, 0.0f, 0.5f));
+	//barrel_actor->setRigidBodyFlag(physx::PxRigidBodyFlag::eENABLE_CCD, true);
+	//barrel_actor->setMass(10.0f);
+	//mScene->addActor(*barrel_actor);
 #endif
 }
 
@@ -167,11 +175,8 @@ void World::initPhysics() {
 	//	pvd_client->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
 	//}
 
-	/* Create Simulation */
+	/* Create Global Material */
 	mMaterial = mPhysics->createMaterial(0.5f, 0.5f, 0.6f); // static friction, dynamic friction, restitution
-	physx::PxRigidStatic* ground_plane = physx::PxCreatePlane(*mPhysics, physx::PxPlane(0.0f, 1.0f, 0.0f, 1.0f), *mMaterial);
-	mScene->addActor(*ground_plane);
-	//boxes.push_back(ground_plane);
 }
 
 
