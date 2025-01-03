@@ -113,9 +113,18 @@ physx::PxRigidStatic* Object::createRigidStatic(physx::PxPhysics* physics, physx
 		physx::PxVec3(_position.x, _position.y, _position.z),
 		physx::PxQuat(_rotation.x, _rotation.y, _rotation.z, _rotation.w)
 	);
+	_px_transform.p += physx::PxVec3(0.0f, 2.0, 0.0f);
 	rigid_static = physics->createRigidStatic(_px_transform);
 	{
-		physx::PxShape* shape = physics->createShape(physx::PxTriangleMeshGeometry(px_triangle_mesh), *material);
+		//physx::PxShape* shape = physics->createShape(physx::PxTriangleMeshGeometry(px_triangle_mesh), *material);
+		physx::PxShape* shape = physics->createShape(physx::PxBoxGeometry(1.0f, 2.0, 1.0f), *material);
+		
+		shape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+		shape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, false);
+		physx::PxFilterData filterData;
+		filterData.word0 = 1; filterData.word1 = 1;
+		shape->setSimulationFilterData(filterData);
+
 		rigid_static->attachShape(*shape);
 		shape->release();
 	}

@@ -30,6 +30,8 @@ inline bool is_wasd() { return keyboard[GLFW_KEY_W] || keyboard[GLFW_KEY_A] || k
 
 extern irrklang::ISoundEngine* sound_engine;
 
+extern bool kinematicTouchStatic;
+
 using ResizeCB = void(*)(int, int);
 using KeyboardCB = void(*)(int, int, int, int);
 using MouseMoveCB = void(*)(double, double);

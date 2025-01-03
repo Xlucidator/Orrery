@@ -10,6 +10,7 @@
 #include "model/Model.h"
 #include "animation/Animator.h"
 #include "animation/Animation.h"
+#include "physics/CollisionCB.h"
 
 #include <vector>
 
@@ -17,15 +18,17 @@ class World {
 public:
 	World();
 	~World() {
-		// Must in order
+		// Must in order: Material -> Scene
 		if (mCookingParams) { delete mCookingParams;	mCookingParams = nullptr;	std::cout << "Cleared mCookingParams" << std::endl; }
 		if (mMaterial)		{ mMaterial->release();		mMaterial = nullptr;		std::cout << "Cleared mMaterial" << std::endl; }
 		if (mScene)			{ mScene->release();		mScene = nullptr;			std::cout << "Cleared mScene" << std::endl; }
 		if (mPhysics)		{ mPhysics->release();		mPhysics = nullptr;			std::cout << "Cleared mPhysics" << std::endl; }
 		if (mDispatcher)	{ mDispatcher->release();	mDispatcher = nullptr;		std::cout << "Cleared mDispatcher" << std::endl; }
-		
+		if (mPvd) { mPvd->release();			mPvd = nullptr;				std::cout << "Cleared mPvd" << std::endl; } // Not used
+
+		if (mCollisionCallback) { delete mCollisionCallback; mCollisionCallback = nullptr; }
+
 		// Must be the Last One
-		if (mPvd)			{ mPvd->release();			mPvd = nullptr;				std::cout << "Cleared mPvd" << std::endl; } // Not used
 		if (mFoundation)	{ mFoundation->release();	mFoundation = nullptr;		std::cout << "Cleared mFoundation" << std::endl; }
 	}
 
@@ -82,6 +85,7 @@ private:
 	physx::PxScene*					mScene = nullptr;
 	//physx::PxPvdSceneClient*		mPvdClient = nullptr;
 	physx::PxMaterial*				mMaterial = nullptr;
+	MyCollisionCallback*			mCollisionCallback = nullptr;
 	
 	/* Utils */
 	bool need_start = true;
@@ -91,6 +95,10 @@ private:
 	void initObjects();
 };
 
+
+physx::PxFilterFlags MyFilterShader(physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
+	physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
+	physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
 
 #endif // !WORLD_H
 

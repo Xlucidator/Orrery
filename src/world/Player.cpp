@@ -3,7 +3,6 @@
 
 #include "utils.h"
 
-
 void Player::walk() {
 	_status = PLAYER_WALK; 
 	if (!walking_sound || walking_sound->isFinished()) {
@@ -21,12 +20,17 @@ void Player::idle() {
 }
 
 void Player::update(float _delta_time) {
-	updateModelMatrix();
+	
 	if (_status == PLAYER_WALK) {
 		animator->update(_delta_time);
 	}
-	_px_transform.p = physx::PxVec3(_position.x, _position.y + _aabb_hy, _position.z); // ignore rotation first
-	rigid_dynamic->setKinematicTarget(_px_transform);
+
+	physx::PxTransform transform_to_test(
+		physx::PxVec3(_position.x, _position.y, _position.z),
+		physx::PxQuat(_rotation.x, _rotation.y, _rotation.z, _rotation.w)
+	);
+	transform_to_test.p = physx::PxVec3(_position.x, _position.y + _aabb_hy, _position.z); // ignore rotation first
+	rigid_dynamic->setKinematicTarget(transform_to_test);
 }
 
 
@@ -70,7 +74,14 @@ physx::PxRigidDynamic* Player::createRigidDynamic(physx::PxPhysics* physics, phy
 	rigid_dynamic = physics->createRigidDynamic(_px_transform);
 	{
 		//physx::PxShape* shape = physics->createShape(physx::PxTriangleMeshGeometry(px_triangle_mesh), *material);
-		physx::PxShape* shape = physics->createShape(physx::PxBoxGeometry(0.5f, _aabb_hy, 0.5f), *material);
+		physx::PxShape* shape = physics->createShape(physx::PxBoxGeometry(0.8f, _aabb_hy, 0.3f), *material);
+		
+		shape->setFlag(physx::PxShapeFlag::eSIMULATION_SHAPE, true);
+		shape->setFlag(physx::PxShapeFlag::eTRIGGER_SHAPE, false);
+		physx::PxFilterData filterData;
+		filterData.word0 = 1; filterData.word1 = 1;
+		shape->setSimulationFilterData(filterData);
+		
 		rigid_dynamic->attachShape(*shape);
 		shape->release();
 	}
@@ -79,20 +90,13 @@ physx::PxRigidDynamic* Player::createRigidDynamic(physx::PxPhysics* physics, phy
 }
 
 void Player::updateSimulateResult() {
-	// update PxTransform
-	//physx::PxTransform px_new_transform = rigid_dynamic->getGlobalPose();
-	//if (px_new_transform == _px_transform) return;
+	if (kinematicTouchStatic) {
+		// the _position = > transform_to_test is illegal, so set back to previous _px_transform
+		_position = glm::vec3(_px_transform.p.x, _px_transform.p.y - _aabb_hy, _px_transform.p.z);
+	}
+	else { // thus confirm to update _px_transform to new _position
+		_px_transform.p = physx::PxVec3(_position.x, _position.y + _aabb_hy, _position.z);
+	}
 
-	//std::cout << "[Player][prev px_transform]" << std::endl;
-	//printPxTransform(_px_transform);
-	//std::cout << "[Player][new  px_transform]" << std::endl;
-	//printPxTransform(px_new_transform);
-
-	//_px_transform = px_new_transform;
-	//// convert to glm positon and rotate
-	//_position = glm::vec3(_px_transform.p.x, _px_transform.p.y - _aabb_hy, _px_transform.p.z);
-	//_rotation = glm::quat(_px_transform.q.w, _px_transform.q.x, _px_transform.q.y, _px_transform.q.z);
-	//// finally update model matrix and norm model matrix
-	//_model_matrix = createModelMatrix(_position, _rotation, _scale);
-	//updateNormModelMatrix();
+	updateModelMatrix();
 }

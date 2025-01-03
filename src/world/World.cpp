@@ -2,6 +2,8 @@
 #include "World.h"
 #include "utils.h"
 
+bool kinematicTouchStatic = false;
+
 World::World() {
 	/* Init Time */ 
 	_last_frame = 0.0f;
@@ -46,12 +48,12 @@ void World::update() {
 	/* React to Input */
 	processKeyboardInput();
 
-	/* Animate */
+	/* Object Update: Animate or Try Moving */
 	for (auto& obj : _objects) {
 		obj->update(_delta_time);
 	}
 
-	/* Get Physcs Simulation */
+	/* Get Physcs Simulation: Update or Amend */
 #ifdef PHYSIC_IMPL
 	if (mScene) {
 		mScene->simulate(_delta_time);
@@ -115,14 +117,16 @@ void World::initObjects() {
 	glm::mat4 model_transform[] = {  // Location		// Scale
 		createModelMatrix(glm::vec3(-1.0f, 2.0f,  0.0f)),
 		createModelMatrix(glm::vec3( 3.0f, 0.0f, -4.0f)),
-		createModelMatrix(glm::vec3( 2.0f, 0.0f, -6.0f)),
+		createModelMatrix(glm::vec3( 2.0f, 0.0f, -8.0f)),
 		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f))
 	};
 
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, DYNAMIC,
 		glm::vec3(-4.0f, 0.5f, 0.0f), 1.0f, glm::vec3(0.0f, -1.0f, 0.2f)
 	));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, box   , model_transform[1], STATIC));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, box, STATIC,
+		glm::vec3(3.0f, 0.0f, -4.0f), 1.0f
+	));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2], STATIC));
 	//_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], 0.7f));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, ruins, STATIC,
@@ -152,8 +156,8 @@ void World::initObjects() {
 	barrel_actor->setCMassLocalPose(physx::PxTransform(0.0f, 0.7f, 0.0f));
 	mScene->addActor(*barrel_actor);
 
-	//auto box_actor = _objects[2]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
-	//mScene->addActor(*box_actor);
+	auto box_actor = _objects[3]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
+	mScene->addActor(*box_actor);
 
 	for (int i = 3; i < _objects.size(); i++) {
 
@@ -192,10 +196,14 @@ void World::initPhysics() {
 	// Create CPU Dispatcher
 	mDispatcher = physx::PxDefaultCpuDispatcherCreate(2);
 	scene_desc.cpuDispatcher = mDispatcher;
-	scene_desc.filterShader = physx::PxDefaultSimulationFilterShader;
+
+	// Set Filter Shader
+	scene_desc.filterShader = MyFilterShader;
 
 	// Create Scene
 	mScene = mPhysics->createScene(scene_desc);
+	mCollisionCallback = new MyCollisionCallback();
+	mScene->setSimulationEventCallback(mCollisionCallback);
 
 	// Pvd Client
 	//physx::PxPvdSceneClient* pvd_client = mScene->getScenePvdClient();
@@ -207,6 +215,17 @@ void World::initPhysics() {
 
 	/* Create Global Material */
 	mMaterial = mPhysics->createMaterial(0.5f, 0.5f, 0.6f); // static friction, dynamic friction, restitution
+}
+
+physx::PxFilterFlags MyFilterShader(physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
+	physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
+	physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize) {
+	// enable default flags
+	pairFlags = physx::PxPairFlag::eCONTACT_DEFAULT;
+	// add touch notification
+	pairFlags |= physx::PxPairFlag::eNOTIFY_TOUCH_FOUND;
+	pairFlags |= physx::PxPairFlag::eNOTIFY_TOUCH_LOST;
+	return physx::PxFilterFlag::eDEFAULT;
 }
 
 
