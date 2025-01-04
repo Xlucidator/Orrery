@@ -48,4 +48,8 @@ inline void printPxTransform(const physx::PxTransform& transform) {
 
 extern std::unordered_map<int8_t, glm::vec3> pace_vec;
 
+std::vector<glm::vec3> generateRandomPoints(int n, float x_min, float x_max, float z_min, float z_max, float min_distance);
+std::vector<glm::vec3> generateRandomPoints(int n, float r_min, float r_max, float min_distance);
+
+
 #endif // !UTILS_H

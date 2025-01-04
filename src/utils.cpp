@@ -67,3 +67,86 @@ std::unordered_map<int8_t, glm::vec3> pace_vec = {
 	{ GLFW_KEY_A, glm::vec3(-1.0f, 0.0f,  0.0f) },
 	{ GLFW_KEY_D, glm::vec3( 1.0f, 0.0f,  0.0f) }
 };
+
+std::vector<glm::vec3> generateRandomPoints (
+	int n,
+	float x_min, float x_max,
+	float z_min, float z_max,
+	float min_distance
+) {
+	std::vector<glm::vec2> points;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> x_dist(x_min, x_max);
+	std::uniform_real_distribution<float> z_dist(z_min, z_max);
+
+	while (points.size() < n) {
+		glm::vec2 p = { x_dist(gen), z_dist(gen) };
+		bool valid = true;
+
+		// Check
+		for (const glm::vec2& existing : points) {
+			if (glm::distance(p, existing) < min_distance) {
+				valid = false;
+				break;
+			}
+		}
+
+		if (valid) {
+			points.push_back(p);
+		}
+	}
+
+	std::vector<glm::vec3> vec3_points;
+	std::uniform_real_distribution<float> y_dist(0.5f, 2.0f); // do not involved caculating distance
+	std::transform(points.begin(), points.end(), std::back_inserter(vec3_points),
+		[&](const glm::vec2& p) {
+			return glm::vec3(p.x, y_dist(gen), p.y);
+		}
+	);
+
+	return vec3_points;
+}
+
+std::vector<glm::vec3> generateRandomPoints(
+	int n,
+	float r_min, float r_max,
+	float min_distance
+) {
+	std::vector<glm::vec2> points;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> radius_dist(r_min, r_max);
+	std::uniform_real_distribution<float> angle_dist(0.0f, 2.0f * 3.14159f);
+
+	while (points.size() < n) {
+		// Using Polar Coordinate
+		float r = radius_dist(gen);
+		float theta = angle_dist(gen);
+		
+		glm::vec2 p = { r * cos(theta), r * sin(theta) };
+
+		// Check
+		bool valid = true;
+		for (const auto& existing : points) {
+			if (glm::distance(p, existing) < min_distance) {
+				valid = false;
+				break;
+			}
+		}
+
+		if (valid) {
+			points.push_back(p);
+		}
+	}
+
+	std::vector<glm::vec3> vec3_points;
+	std::uniform_real_distribution<float> y_dist(0.5f, 2.0f); // do not involved caculating distance
+	std::transform(points.begin(), points.end(), std::back_inserter(vec3_points),
+		[&](const glm::vec2& p) {
+			return glm::vec3(p.x, y_dist(gen), p.y);
+		}
+	);
+
+	return vec3_points;
+}

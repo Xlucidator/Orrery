@@ -99,9 +99,9 @@ void World::initObjects() {
 	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");
 	auto box = std::make_shared<Model>("assets/objects/box/box_resize.obj");
 	auto barrels = std::make_shared<Model>("assets/objects/barrelpack/barrels_packed.obj");
-	//auto vampire = std::make_shared<Model>("assets/objects/vampire/dancing_vampire.dae");
-	auto knight = std::make_shared<Model>("assets/objects/knightguard/Knighty92-onlyman.fbx");
-	//auto ruins = std::make_shared<Model>("assets/objects/ruins/Ruins-Pillars-Arch.obj");
+	auto knight = std::make_shared<Model>("assets/objects/knightguard/KnightGuard-nospear.fbx");
+	auto hawk = std::make_shared<Model>("assets/objects/hawk/SparrowHawk.fbx");
+
 	/* Debug */
 	// knight->printMesh();
 
@@ -117,29 +117,55 @@ void World::initObjects() {
 	
 	/* Create Player */
 	_player = std::make_shared<Player>(_global_shader, avatar, _border); // Must be Dynamic
-	_objects.push_back(_player);
+	_objects.push_back(_player); // _objects[9]
 	_camera.followAt(_player);
 
 	/* Create Objects */
 	glm::mat4 model_transform[] = {  // Location		// Scale
-		createModelMatrix(glm::vec3(-1.0f, 2.0f,  0.0f)),
-		createModelMatrix(glm::vec3( 3.0f, 0.0f, -4.0f)),
 		createModelMatrix(glm::vec3( 2.0f, 0.0f, -8.0f)),
-		createModelMatrix(glm::vec3(-5.0f, 0.0f, -5.0f))
 	};
+	// _object[10+]
+	int random_pos_num = 8;
+	std::vector<glm::vec3> random_positions = generateRandomPoints(random_pos_num, 1.5f, _border, 4.0f);
+	std::cout << "[Randomly Generate Positions]" << std::endl;
+	for (auto& pos : random_positions) {
+		std::cout << "\t" << glm::to_string(pos) << std::endl;
+	}
 
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, DYNAMIC,
-		glm::vec3(-4.0f, 0.5f, 0.0f), 1.0f, glm::vec3(0.0f, -1.0f, 0.2f)
-	));
+	// Interactable Barrel
+	int barrel_num = 3;
+	for (int i = 0; i < barrel_num; i++) {
+		_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, DYNAMIC,
+			random_positions[i], 1.0f, glm::vec3(0.0f, -1.0f, 0.2f)
+		));
+	}
+	
+	// Box
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, box, STATIC,
 		glm::vec3(3.0f, 0.0f, -4.0f), 1.0f
 	));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2], STATIC));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], STATIC, 0.7f));
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[0], STATIC));
+
+	// Quad Guard
+	for (uint8_t i = 0; i < 4; i++) {
+		_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, STATIC,
+			glm::vec3(-21.0f + (i & 0b01) * 42.0f, 0.0f, -21.0f + (i >> 1) * 42.0f), 
+			0.8f,
+			glm::vec3(-1.0f + (i & 0b01) * 2.0f, 0.0f, -1.0f + (i >> 1) * 2.0f)
+		));
+	}
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, STATIC,
+		glm::vec3(-5.0f, 0.0f, -5.0f), 0.8f, glm::vec3(0.0f, 0.0f, -1.0f)
+	));
+
+	// Flying bird
+	_objects.emplace_back(std::make_shared<Object>(_global_shader, hawk, STATIC,
+		glm::vec3(-2.0f, 2.0f, 2.0f), 0.3f, glm::vec3(0.0f, 0.0f, -1.0f)
+	));
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
-	// Ground
+	// Ground: 
 	physx::PxRigidStatic* ground_plane = mPhysics->createRigidStatic(physx::PxTransform(0.0f, -0.5f, 0.0f));
 	{
 		physx::PxShape* ground_shape = mPhysics->createShape(physx::PxBoxGeometry(50.0f, 0.5f, 50.0f), *mMaterial);
@@ -154,13 +180,15 @@ void World::initObjects() {
 	mScene->addActor(*player);
 	
 	// Other Objects
-	auto barrel_actor = _objects[10]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
-	barrel_actor->setMass(5.0f);
-	barrel_actor->setCMassLocalPose(physx::PxTransform(0.0f, 0.7f, 0.0f));
-	mScene->addActor(*barrel_actor);
+	for (int i = 0; i < barrel_num; i++) {
+		auto barrel_actor = _objects[10 + i]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
+		barrel_actor->setMass(5.0f);
+		barrel_actor->setCMassLocalPose(physx::PxTransform(0.0f, 0.7f, 0.0f));
+		mScene->addActor(*barrel_actor);
+	}
 
-	auto box_actor = _objects[11]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
-	mScene->addActor(*box_actor);
+	//auto box_actor = _objects[11]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
+	//mScene->addActor(*box_actor);
 
 	for (int i = 10; i < _objects.size(); i++) {/* Other Objects in Batch */}
 #endif

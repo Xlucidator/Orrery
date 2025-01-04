@@ -145,6 +145,7 @@ physx::PxRigidDynamic* Object::createRigidDynamic(physx::PxPhysics* physics, phy
 		rigid_dynamic->attachShape(*shape);
 		shape->release();
 	}
+	rigid_dynamic->setMass(10.0f);
 	rigid_dynamic->setLinearDamping(0.01f);
 	rigid_dynamic->setAngularDamping(0.5f);
 	rigid_dynamic->setSleepThreshold(0.05f);

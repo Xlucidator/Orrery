@@ -46,7 +46,7 @@ public:
 
 private:
 	/*=== World ===*/
-	float _border = 30.0f;
+	float _border = 20.0f;
 
 	/*=== Object ===*/
 	std::shared_ptr<Player> _player = nullptr;

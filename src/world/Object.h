@@ -87,6 +87,7 @@ protected:
 	/* Physics */
 	physx::PxTriangleMesh* px_triangle_mesh = nullptr;
 	void cookAndCreateTriangleMesh(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams);
+
 };
 
 

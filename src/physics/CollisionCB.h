@@ -13,14 +13,14 @@ public:
     void onSleep(physx::PxActor** actors, physx::PxU32 count) override {}
 
     void onContact(const physx::PxContactPairHeader& pairHeader, const physx::PxContactPair* pairs, physx::PxU32 nbPairs) override {
-        std::cout << "on Contact" << std::endl;
+        //std::cout << "on Contact" << std::endl;
         for (physx::PxU32 i = 0; i < nbPairs; i++) {
             const physx::PxContactPair& contact = pairs[i];
             if (contact.events & physx::PxPairFlag::eNOTIFY_TOUCH_FOUND) {
-                std::cout << "eNOTIFY_TOUCH_FOUND" << std::endl;
+                //std::cout << "eNOTIFY_TOUCH_FOUND" << std::endl;
                 physx::PxRigidActor* actorA = static_cast<physx::PxRigidActor*>(pairHeader.actors[0]);
                 physx::PxRigidActor* actorB = static_cast<physx::PxRigidActor*>(pairHeader.actors[1]);
-                testActorType(actorA); testActorType(actorB);
+                //testActorType(actorA); testActorType(actorB);
 
                 if (kinematicAndStatic(actorA, actorB)) {
 					std::cout << "Kinematic touch Static" << std::endl;
@@ -28,10 +28,10 @@ public:
                 }
             }
             if (contact.events & physx::PxPairFlag::eNOTIFY_TOUCH_LOST) {
-                std::cout << "eNOTIFY_TOUCH_LOST" << std::endl;
+                //std::cout << "eNOTIFY_TOUCH_LOST" << std::endl;
                 physx::PxRigidActor* actorA = static_cast<physx::PxRigidActor*>(pairHeader.actors[0]);
                 physx::PxRigidActor* actorB = static_cast<physx::PxRigidActor*>(pairHeader.actors[1]);
-                testActorType(actorA); testActorType(actorB);
+                //testActorType(actorA); testActorType(actorB);
 
                 if (kinematicAndStatic(actorA, actorB)) {
                     std::cout << "Kinematic leave Static" << std::endl;
