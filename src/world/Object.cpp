@@ -1,8 +1,6 @@
 
 #include "Object.h"
 
-#include "utils.h"
-
 #include <vector>
 
 // Can be Redundant and Silly
@@ -66,6 +64,9 @@ void Object::start() {
 }
 
 void Object::update(float _delta_time) {
+	if (_random_move) {
+		updateRandomMove(_delta_time);
+	}
 	animator->update(_delta_time);
 }
 
@@ -152,21 +153,6 @@ physx::PxRigidDynamic* Object::createRigidDynamic(physx::PxPhysics* physics, phy
 	return rigid_dynamic;
 }
 
-void Object::setActorFlag(physx::PxActorFlag::Enum flag, bool value) { // TODO: silly
-	if (px_type == DYNAMIC && rigid_dynamic) {
-		rigid_dynamic->setActorFlag(flag, value);
-	}
-	else if (px_type == STATIC && rigid_static) {
-		rigid_static->setActorFlag(flag, value);
-	}
-}
-
-void Object::setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value) { // TODO: silly
-	if (px_type == DYNAMIC && rigid_dynamic) {
-		rigid_dynamic->setRigidBodyFlag(flag, value);
-	}
-}
-
 void Object::updateSimulateResult() {
 	if (px_type != DYNAMIC) return;
 	
@@ -188,4 +174,41 @@ void Object::updateSimulateResult() {
 	// finally update model matrix and norm model matrix
 	_model_matrix = createModelMatrix(_position, _rotation, glm::vec3(_scale));
 	updateNormModelMatrix();
+}
+
+
+/* Special */ // TODO: Move in to new Derived Class
+void Object::enableRandomMove(float height, float speed) {
+	_random_height = height;
+	_random_move_speed = speed;
+	generateAndSetRandomTrack();
+	_random_move = true;
+}
+
+void Object::generateAndSetRandomTrack() {
+	// Need to Start/End out of World View Border */
+	_random_from = generateRandomPoints(1, 35.0f, 45.0f, 0.0f)[0];
+	_random_to = -_random_from;
+
+	// Correct Height
+	_random_from.y = _random_to.y = _random_height;
+	std::cout << this << " [New Random Move]";
+	std::cout << " from " << glm::to_string(_random_from) << " to " << glm::to_string(_random_to) << std::endl;
+	
+	// Reset
+	_position = _random_from; _up = glm::vec3(0.0f, 1.0f, 0.0f);
+	_front = glm::normalize(_random_to - _random_from); 
+	_right = glm::cross(_front, _up);
+	updateModelMatrixThroughEuler();
+}
+
+void Object::updateRandomMove(float delta_time) {
+	float velocity = _random_move_speed * delta_time;
+	if (glm::distance(_position, _random_to) < velocity) {
+		generateAndSetRandomTrack();
+		return;
+	}
+	_position += _front * velocity;
+	//std::cout << "update position: " << glm::to_string(_position) << std::endl;
+	updateModelMatrixThroughEuler();
 }

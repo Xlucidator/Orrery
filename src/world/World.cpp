@@ -124,7 +124,7 @@ void World::initObjects() {
 	const int obj_begin = 10;
 	const int barrel_num = 4, box_num = 3, barrelpack_num = 1;
 	int random_pos_num = barrel_num + box_num + barrelpack_num;
-	std::vector<glm::vec3> random_positions = generateRandomPoints(random_pos_num, 1.5f, _border, 4.0f);
+	std::vector<glm::vec3> random_positions = generateRandomPoints(random_pos_num, 1.5f, _border, 5.0f);
 	std::cout << "[Randomly Generate Positions]" << std::endl;
 	for (auto& pos : random_positions) {
 		std::cout << "\t" << glm::to_string(pos) << std::endl;
@@ -170,9 +170,15 @@ void World::initObjects() {
 	));
 
 	// Flying bird
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, hawk, STATIC,
-		glm::vec3(-2.0f, 2.0f, 2.0f), 0.3f, glm::vec3(0.0f, 0.0f, -1.0f)
-	));
+	for (int i = 0; i < 2; i++) {
+		auto random_flying_bird = std::make_shared<Object>(_global_shader, hawk, DYNAMIC,
+			glm::vec3(-2.0f, 3.0f, 2.0f), 0.3f, glm::vec3(0.0f, 0.0f, -1.0f)
+		);
+		random_flying_bird->enableRandomMove(3.5f, 4.5f);
+		_objects.push_back(random_flying_bird);
+	}
+	
+	
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
@@ -191,7 +197,6 @@ void World::initObjects() {
 	mScene->addActor(*player);
 	
 	// Other Objects
-	// Barrel
 	for (int i = 0; i < barrel_end; i++) {
 		auto barrel_actor = _objects[obj_begin + i]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
 		barrel_actor->setMass(5.0f);
@@ -199,16 +204,17 @@ void World::initObjects() {
 		mScene->addActor(*barrel_actor);
 	}
 
-	for (int i = barrel_end; i < box_end; i++) {
-		auto box_actor = _objects[obj_begin + i]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
-		mScene->addActor(*box_actor);
-	}
+	//for (int i = barrel_end; i < box_end; i++) {
+	//	auto box_actor = _objects[obj_begin + i]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
+	//	mScene->addActor(*box_actor);
+	//}
 	
-	for (int i = box_end; i < barrelpack_end; i++) {
+	//for (int i = box_end; i < barrelpack_end; i++) {
+	//	auto barrelpack_actor = _objects[obj_begin + i]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
+	//	mScene->addActor(*barrelpack_actor);
+	//}
 
-	}
-
-	for (int i = 10; i < _objects.size(); i++) {/* Other Objects in Batch */}
+	//for (int i = 10; i < _objects.size(); i++) {/* Other Objects in Batch */}
 #endif
 }
 

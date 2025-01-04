@@ -5,6 +5,7 @@
 #include "shader/Shader.h"
 #include "model/Model.h"
 #include "animation/Animator.h"
+#include "utils.h"
 
 #include <string>
 
@@ -52,8 +53,6 @@ public:
 	physx::PxRigidDynamic* rigid_dynamic = nullptr;
 	physx::PxRigidStatic* createRigidStatic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
 	virtual physx::PxRigidDynamic* createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
-	void setActorFlag(physx::PxActorFlag::Enum flag, bool value);
-	void setRigidBodyFlag(physx::PxRigidBodyFlag::Enum flag, bool value);
 	virtual void updateSimulateResult();
 
 	/* Animator: Drive Animation */
@@ -63,6 +62,9 @@ public:
 	virtual void processKeyboard(float delta_time) {}
 	virtual void processMouseMovement(float xoffset, float yoffset) {}
 	virtual void processMouseScroll(float yoffset) {}
+
+	/* Special: Decorating */
+	void enableRandomMove(float height, float speed);
 
 protected:
 	std::shared_ptr<Shader> _shader = nullptr; // shared
@@ -80,6 +82,13 @@ protected:
 	// For Physics Transform
 	physx::PxTransform _px_transform;
 	
+
+	void updateModelMatrixThroughEuler() { // TODO: Not a Good One, Unify to Quat
+		// assume front.y != 1.0f/-1.0f
+		_right = glm::cross(_front, _up); 
+		_model_matrix = createModelMatrix(_position, _front, _up, _right, glm::vec3(_scale));
+		updateNormModelMatrix();
+	}
 	inline void updateNormModelMatrix() {
 		_norm_model_matrix = glm::transpose(glm::inverse(glm::mat3(_model_matrix)));
 	}
@@ -87,6 +96,13 @@ protected:
 	/* Physics */
 	physx::PxTriangleMesh* px_triangle_mesh = nullptr;
 	void cookAndCreateTriangleMesh(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams);
+
+	/* Special */
+	bool _random_move = false;
+	float  _random_move_speed = 4.0f, _random_height = 3.0f;
+	glm::vec3 _random_from, _random_to;
+	void generateAndSetRandomTrack();
+	void updateRandomMove(float delta_time);
 
 };
 

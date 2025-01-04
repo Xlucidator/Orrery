@@ -100,5 +100,5 @@ void Player::updateSimulateResult() {
 		_px_transform.p = physx::PxVec3(_position.x, _position.y + _aabb_hy, _position.z);
 	}
 
-	updateModelMatrix();
+	updateModelMatrixThroughEuler();
 }

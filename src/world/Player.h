@@ -35,12 +35,6 @@ public:
 	void processMouseMovement(float xoffset, float yoffset) override;
 	void processMouseScroll(float yoffset) override;
 
-	void updateModelMatrix() {
-		_right = glm::cross(_front, _up);
-		_model_matrix = createModelMatrix(_position, _front, _up, _right, glm::vec3(_scale));
-		updateNormModelMatrix();
-	}
-
 	/* Physics */
 	physx::PxRigidDynamic* Player::createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material) override;
 	void updateSimulateResult() override;
