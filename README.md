@@ -16,6 +16,60 @@
 
 
 
+#### 作业得分点对照
+
+> 仅提供参考，建议自己再仔细校对一下
+
+To Pass：**40**（需确认）
+
+| 条目                                                | 完成情况                                                     |
+| --------------------------------------------------- | ------------------------------------------------------------ |
+| Use C++                                             | 符合                                                         |
+| Have report and git with readme                     | 符合：**You TODO** 所以是要求README的，记得自己写一个        |
+| Submit 10 min                                       | **You TODO**                                                 |
+| Code compiles with GL window<br />and basic polygon | 符合，不过项目中已经没有基本polygon了，都是用导入的模型，Triangle Mesh |
+| Signature on scene                                  | **TODO** 不清楚这是要什么签名，要OpenGL渲染文字吗？还是说比如地面哪里整个sinature贴图什么的 |
+| No plagiarism                                       | 符合，注意一下报告中写下引用参考的内容                       |
+
+40-70：**22.5~30**  *（吐槽：这里说caps at 30%有什么意义吗？总共不就30）*
+
+| 条目                                | 完成情况                                                     |
+| ----------------------------------- | ------------------------------------------------------------ |
+| MVP implemented                     | 5/2.5：**TO CHECK** 稍微有点困惑顶点着色器实现具体指什么<br />目前项目是将MVP分别传入(还有bone的M)着色器中，在着色器中做乘法 |
+| Textures                            | 5/2.5：**TO CHECK** 虽说不同模型由不同的纹理构成，但实际作用的纹理贴图都是一个，似乎也不算mix<br />保险的话还是要单模型多贴图mix一下 |
+| 3D Polygons with scene animation    | 5：有循环自动播放的动画(knightguard和随机飞的spawl)，有条件播放的动画(Player的走路动画) |
+| Keyboard and mouse movement         | 5/2.5：键盘和鼠标都有，但它提到了鼠标要fluid and intuitive，目前常态FOLLOW模式鼠标用处不大<br /> **TODO** 保险起见我再写一个通过某个按键切换摄像头模式的功能 |
+| Load model(s) with textures         | 5：自然，同时也是多格式，obj/fbx，其实删去的vampire时dae（但应该无所谓） |
+| Procedural content generation (PCG) | 5：高度区分，有地面物体和空中飞鸟，同时初始化的barrel高度也不一样<br />随机生成不冲突的位置，也有不同物种 barrel 和 box 等； |
+
+Aesthetic：**5** （先这么认为吧，虽然确实不好看）
+
+Advanced：**7.5+**
+
+| 条目                            | 完成情况                                                     |
+| ------------------------------- | ------------------------------------------------------------ |
+| Mixed textures                  | 0：无，但是2.5的normal map感觉可以考虑，半成型               |
+| Model animation in assimp       | 2.5+：single torus是指单一循环的动画吗，不过主角的也只有走路一种动画 |
+| Interaction/adjust model params | 0：**TO CHECK**，如果是按某个键调整模型参数的话，干脆就影响最简单的scale，2.5似乎实现比较容易 |
+| BlinnPhong/PBR lighting         | 0：其实可以有，但没应用                                      |
+| Audio                           | 5：有BGM，和走路时的声音                                     |
+
+Last 10%：**0**
+
+Penalties：**-5？**
+
+| 条目                                        | 情况                                                         |
+| ------------------------------------------- | ------------------------------------------------------------ |
+| Using other libraries without authorisation | -0：哦哦原来说了learnopengl.com上的不算                      |
+| Final outcome differs too much from pitch   | -? : 感觉还是有好大差距的，毕竟没有游戏性                    |
+| No OOP paradigm in main CPP                 | -0：我认为还是基本OOP的，虽有有些结构因为匆忙比较silly       |
+| Insufficient internal documentation         | -? ：You TODO                                                |
+| Insufficient error handling                 | -0?：实在不行PhysX的实例就生成一个动态刚体，这样就不会不稳定了<br />有些急所以后期一些库使用时的错误处理确实是不足的，**OpenGL的是够的，见GL_CALL** |
+
+预估总计：**70~77.5**
+
+
+
 ### 架构介绍
 
 #### 目录结构
@@ -94,12 +148,16 @@
 2. 带动画的模型可以采用dae格式，但是项目导入Blender中新导出dae文件，渲染的顶点位置会很怪（看起来像是四元数顺序不匹配导致），而当前版本的ASSIMP不支持Blender新导出的glb格式，经测试项目fbx格式的动画导入正常，因而主要使用fbx格式
    - Player对应的模型的骨骼和走路动画是我自己加的，略显粗糙；似乎暂时没能找到带有合理骨骼和动画的角色模型
    - 作为地面的模型也是我自己用Blender建的，即为平面+纹理贴图，比较简陋；似乎也难以找到何时的场景建模
-3. PhysX中的地面不能使用Plane，因为没有厚度动态刚体(RigidDynamic)会直接穿过它，于是在物理模拟时给它增加了厚度
-4. Player对应的动态刚体设置了“运动学刚体”`setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true)`，仅受用户输入控制，每帧模拟前使用`rigid_dynamic->setKinematicTarget(transform_to_test)`传入预期位置，随后在`mScene->simulate(...)`时进行判定；角色的物理模型采用了简单的包围盒进行模拟
+3. **[new]** 为了减小模型大小，提高资源利用率：地面由9个Object拼成，均指向同一个导入的模型，只不过在位置上做了变化
+4. PhysX中的地面不能使用Plane，因为没有厚度动态刚体(RigidDynamic)会直接穿过它，于是在物理模拟时给它增加了厚度
+5. Player对应的动态刚体设置了“运动学刚体”`setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true)`，仅受用户输入控制，每帧模拟前使用`rigid_dynamic->setKinematicTarget(transform_to_test)`传入预期位置，随后在`mScene->simulate(...)`时进行判定；角色的物理模型采用了简单的包围盒进行模拟
    - 疑似根据Model建立的`px_triangle_mesh`没法很好的工作，所以Player在PhysX中的物理形状静态配置成了简单的AABB包围盒，`_aabb_hy`为其半高
-5. PhysX中运动学刚体和静态刚体RigidStatic之间的碰撞检测尚不成功：尚不知怎样正确的触发回调函数；**运动学刚体和动态刚体之间的碰撞可以生效**，见运行程序行为中角色和桶的碰撞
-6. 世界场地设置了边界`border`，为±30.0f的正方形，角色不会超出此范围
-7. 导入的走路音效在某些时间段存在失真，不过第一步的声音是正常的，或许可以尝试剪切为仅踏出第一步的时间段，然后循环播放
+6. PhysX中运动学刚体和静态刚体RigidStatic之间的碰撞检测尚不成功：尚不知怎样正确的触发回调函数；**运动学刚体和动态刚体之间的碰撞可以生效**，见运行程序行为中角色和桶的碰撞
+7. **[new]** 增加了随机位置生成，然后增加了各模型生成Object的数量；**增加了PhysX动态刚体和静态刚体生成数量，但这也导致程序运行时的不稳定**，刚体之间的作用有时能成功，有时会莫名遭遇运行时的错误，且发生错误的位置不唯一；
+   - 运行时错误发生时可能的位置所在文件（这竟然还不在项目的库文件中，不知道在哪儿）：GuCollisionSDF.h，GuContactMeshMesh.h，PxcNpBatch.cpp ...
+   - **这个我再调调吧，实在不行的话就仅实例化一个刚体好了**（看作业得分点中不是基础得分项），先为其他服务；你也可以自己试一试
+8. 世界场地设置了边界`border`，为**±20.0f**的正方形，角色不会超出此范围
+9. 导入的走路音效在某些时间段存在失真，不过第一步的声音是正常的，或许可以尝试剪切为仅踏出第一步的时间段，然后循环播放
 
 
 
@@ -121,7 +179,7 @@
 - 用于参考如何使用PhysX
   - 官方文档 https://nvidia-omniverse.github.io/PhysX/physx/5.5.0/index.html
   - 初始化示例介绍 https://www.youtube.com/watch?v=zOYpVAoQFyU
-  - 项目 https://github.com/kmiloarguello/openGL-physX ，本地可编译运行，不过使用的是PhysX 4.1, 与5.5的实现存在区别
+  - 项目 https://github.com/kmiloarguello/openGL-physX，本地可编译运行，不过使用的是PhysX 4.1, 与5.5的实现存在区别
 
 辅助工具
 
