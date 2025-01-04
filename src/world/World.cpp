@@ -93,7 +93,7 @@ void World::initObjects() {
 		"assets/shaders/loadobj_nolight.frag"
 	);
 
-	auto ground = std::make_shared<Model>("assets/objects/ground/bigger_ground.obj");
+	auto ground = std::make_shared<Model>("assets/objects/ground/ground.obj");
 	auto avatar = std::make_shared<Model>("assets/objects/darknight/darknight.fbx");
 	
 	auto barrel = std::make_shared<Model>("assets/objects/barrel/Barrel.obj");
@@ -101,12 +101,19 @@ void World::initObjects() {
 	auto barrels = std::make_shared<Model>("assets/objects/barrelpack/barrels_packed.obj");
 	//auto vampire = std::make_shared<Model>("assets/objects/vampire/dancing_vampire.dae");
 	auto knight = std::make_shared<Model>("assets/objects/knightguard/Knighty92-onlyman.fbx");
-	auto ruins = std::make_shared<Model>("assets/objects/ruins/Ruins-Pillars-Arch.obj");
+	//auto ruins = std::make_shared<Model>("assets/objects/ruins/Ruins-Pillars-Arch.obj");
 	/* Debug */
 	// knight->printMesh();
 
 	/* Create Ground */
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, ground, STATIC));
+	float ground_interval = 30.0f;
+	for (int i = -1; i <= 1; i++) { // _objects[0 ~ 8]
+		for (int j = -1; j <= 1; j++) {
+			_objects.emplace_back(std::make_shared<Object>(_global_shader, ground, STATIC,
+				glm::vec3(i * ground_interval, 0.0f, j * ground_interval)
+			));
+		}
+	}
 	
 	/* Create Player */
 	_player = std::make_shared<Player>(_global_shader, avatar, _border); // Must be Dynamic
@@ -129,9 +136,6 @@ void World::initObjects() {
 	));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[2], STATIC));
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, model_transform[3], STATIC, 0.7f));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, ruins, STATIC,
-		glm::vec3(-20.0f, 0.0f, 10.0f), 1.0f, glm::vec3(1.0f, 0.0f, 0.0f)
-	));
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
@@ -142,8 +146,7 @@ void World::initObjects() {
 		ground_plane->attachShape(*ground_shape);
 		ground_shape->release();
 	}
-	_objects[0]->rigid_static = ground_plane;
-	_objects[0]->px_type = STATIC;
+	_objects[4]->rigid_static = ground_plane; // ground in _objects[4] is loacated in (0.0f, 0.0f, 0.0f) 
 	mScene->addActor(*ground_plane);
 
 	// Player
@@ -151,15 +154,15 @@ void World::initObjects() {
 	mScene->addActor(*player);
 	
 	// Other Objects
-	auto barrel_actor = _objects[2]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
+	auto barrel_actor = _objects[10]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
 	barrel_actor->setMass(5.0f);
 	barrel_actor->setCMassLocalPose(physx::PxTransform(0.0f, 0.7f, 0.0f));
 	mScene->addActor(*barrel_actor);
 
-	auto box_actor = _objects[3]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
+	auto box_actor = _objects[11]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
 	mScene->addActor(*box_actor);
 
-	for (int i = 3; i < _objects.size(); i++) {/* Other Objects in Batch */}
+	for (int i = 10; i < _objects.size(); i++) {/* Other Objects in Batch */}
 #endif
 }
 

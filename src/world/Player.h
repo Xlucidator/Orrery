@@ -56,8 +56,8 @@ protected:
 	inline void limiting() {
 		if (_position.x < -_activity_range) _position.x = -_activity_range;
 		if (_position.x >  _activity_range) _position.x =  _activity_range;
-		if (_position.y < -_activity_range) _position.y = -_activity_range;
-		if (_position.y >  _activity_range) _position.y =  _activity_range;
+		if (_position.z < -_activity_range) _position.z = -_activity_range;
+		if (_position.z >  _activity_range) _position.z =  _activity_range;
 	}
 
 	irrklang::ISound* walking_sound = nullptr;
