@@ -159,9 +159,7 @@ void World::initObjects() {
 	auto box_actor = _objects[3]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
 	mScene->addActor(*box_actor);
 
-	for (int i = 3; i < _objects.size(); i++) {
-
-	}
+	for (int i = 3; i < _objects.size(); i++) {/* Other Objects in Batch */}
 #endif
 }
 

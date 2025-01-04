@@ -12,13 +12,13 @@
 - 物理效果模拟与碰撞检测：PhysX库
   - 使用静态刚体和动态刚体，玩家为运动学刚体
 
-![demo](./demo.png)
+![demo](./figs/demo.png)
 
 
 
 ### 架构介绍
 
-目录结构
+#### 目录结构
 
 ```
 |
@@ -54,33 +54,83 @@
 `- CMakeLists.txt		: 项目通过CMake在Visual Studio 2022中管理
 ```
 
-项目架构：基础设计参考LearnOpenGL，在此基础上进一步结构化和抽象化以遵循OOP变成原则，大体结构如图所示
+#### 项目架构
 
-​                                            ![classes](./figs/classes.png)  
+基础设计参考LearnOpenGL，在此基础上进一步结构化，以方便自定义导入并放置指定模型，同时也遵循OOP编程原则；项目主干类结构关系如图所示
 
-程序运行时，基本流程如图所示
+​                                               ![classed](./figs/classes.png)  
+
+程序主逻辑实现在main.cpp中，可从此处开始梳理项目代码结构关系，代码中也有基本的注释，如果看不懂了再来问吧。项目运行时的基本流程如图所示
 
 ![struct](./figs/structure.png)
+
+#### 使用方式
+
+项目使用方式：使用Visual Studio 2022，配合CMake管理；跨平台尚未验证，至少dll和lib需要更换
+
+- 打开Visual Studio 2022，选择"打开" → "CMake" 通过项目CMakeLists.txt打开项目
+- 调整到Release模式运行，项目MSVC编译器选项已经调至MT（GLFW库和PhysX库均以MT选项编译）
+- 运行前，记得切换到CMakeLists.txt并保存，从而刷新CMake缓存该操作会将*.dll和assets拷贝到可执行文件生成目录，供程序使用
+
+导入自定义模型：在World.cpp文件的`World::initObjects()`函数中，该函数首先编译构建指定着色器，随后导入指定路径的模型，随后依据配置使用指定着色器、模型、位置构建Object，最后可选择性生成Object在PhysX中的物理场景中的形态(刚体)以参与物理模拟
+
+- 分离Model和Object构建的原因在于允许复用模型，即不同Object可指向同个Model，不同Object也可指向同个着色器
+- Object的构造函数有两个，可直接传入模型矩阵，也可传入位置和朝向(默认world_up为y轴正方向，**注意欧拉角使用限制，朝向初始不能沿着y轴**)；可以尝试添加第三个Object构造函数，直接使用旋转四元数（或许可帮助理解代码，并且更好的设置初始形态）
+- 物理刚体创建：根据自己的需求调用`createRigidDynamic`或`createRigidStatic`；Player和Ground的物理初始化相对特殊，不建议更改
+
+程序运行时基本操作方式
+
+- 键盘输入：WASD控制玩家，FOLLOW模式的相机移动；按下空格会在stdout中输出当前角色所在坐标，可用于调试或测量
+- 鼠标移动：普通情况控制相机欧拉角，当前FOLLOW模式相机不响应
+- 鼠标滚轮：相机视角缩放
 
 
 
 ### 注意事项
 
-1. 基本操作方式
-   - 键盘输入：WASD控制玩家，FOLLOW模式的相机移动
-   - 鼠标移动：普通情况控制相机欧拉角，当前FOLLOW模式相机不响应
-   - 鼠标滚轮：相机视角缩放
-2. 项目使用方式
-   - 打开Visual Studio 2022，选择"打开" → "CMake" 通过项目CMakeLists.txt打开项目
-   - 调整到Release模式运行，项目MSVC编译器选项已经调至MT（GLFW库和PhysX库均以MT选项编译）
-3. PhysX中运动学刚体和静态刚体之间的碰撞检测尚不成功：似乎触发回调函数的时机不对
-4. 模型主要来源于Sketchfab，可从Blender中导出obj，不过需要注意将纹理解包出来并处理路径
-5. 带动画的模型可以采用dae格式，但是我从Blender中新导出dae文件，渲染的顶点位置会很怪（看起来像是四元数顺序不匹配导致），当前版本的ASSIMP不支持Blender新导出的glb格式，经测试项目fbx格式的动画导入正常，因而主要使用fbx格式
-6. 
+1. 模型主要来源于Sketchfab，该网站模型质量和可用性似乎较高；可自行重新选择，从Blender中导出obj时需注意
+   - 确保将**纹理解包出来**，然后在着色器视图中重新添加一次新解包出来的纹理，否则导入时可能丢失纹理（tips:导出后可以直接查看obj文件，如果纹理没有丢失就说明ok）
+   - 同时注意导出时的纹理路径，选择“相对路径”，且之后复制到项目assets中时保持同样的相对路径，否则导入将丢失贴图（tips: 可以查看对应的mtl文件中的路径，如果不对可直接修改其中路径为正确的相对路径，前提是确保上一点正确）
+2. 带动画的模型可以采用dae格式，但是项目导入Blender中新导出dae文件，渲染的顶点位置会很怪（看起来像是四元数顺序不匹配导致），而当前版本的ASSIMP不支持Blender新导出的glb格式，经测试项目fbx格式的动画导入正常，因而主要使用fbx格式
+   - Player对应的模型的骨骼和走路动画是我自己加的，略显粗糙；似乎暂时没能找到带有合理骨骼和动画的角色模型
+   - 作为地面的模型也是我自己用Blender建的，即为平面+纹理贴图，比较简陋；似乎也难以找到何时的场景建模
+3. PhysX中的地面不能使用Plane，因为没有厚度动态刚体(RigidDynamic)会直接穿过它，于是在物理模拟时给它增加了厚度
+4. Player对应的动态刚体设置了“运动学刚体”`setRigidBodyFlag(physx::PxRigidBodyFlag::eKINEMATIC, true)`，仅受用户输入控制，每帧模拟前使用`rigid_dynamic->setKinematicTarget(transform_to_test)`传入预期位置，随后在`mScene->simulate(...)`时进行判定；角色的物理模型采用了简单的包围盒进行模拟
+   - 疑似根据Model建立的`px_triangle_mesh`没法很好的工作，所以Player在PhysX中的物理形状静态配置成了简单的AABB包围盒，`_aabb_hy`为其半高
+5. PhysX中运动学刚体和静态刚体RigidStatic之间的碰撞检测尚不成功：尚不知怎样正确的触发回调函数；**运动学刚体和动态刚体之间的碰撞可以生效**，见运行程序行为中角色和桶的碰撞
+6. 世界场地设置了边界`border`，为±30.0f的正方形，角色不会超出此范围
+7. 导入的走路音效在某些时间段存在失真，不过第一步的声音是正常的，或许可以尝试剪切为仅踏出第一步的时间段，然后循环播放
 
 
 
-### 第三方库和工具
+### 参考引用
+
+第三方库：均集成于thirdparty目录中，Windows下可直接使用
+
+- OpenGL 4.6
+- GLFW 3.4：/MT build
+- Glad
+- Assimp 3.3.1
+- PhysX 5.5
+- IrrKlang 1.5
+
+参考资料
+
+- LearnOpenGL网站 https://learnopengl-cn.github.io/  项目 https://github.com/JoeyDeVries/LearnOpenGL 
+  - 较为通俗的教程 https://www.bilibili.com/video/BV1aK4y1z7ii
+- 用于参考如何使用PhysX
+  - 官方文档 https://nvidia-omniverse.github.io/PhysX/physx/5.5.0/index.html
+  - 初始化示例介绍 https://www.youtube.com/watch?v=zOYpVAoQFyU
+  - 项目 https://github.com/kmiloarguello/openGL-physX ，本地可编译运行，不过使用的是PhysX 4.1, 与5.5的实现存在区别
+
+辅助工具
+
+- Blender 4.3.2
+
+资源来源
+
+- Sketchfab, CGTrader, Free3D(似乎比较劣质且数量少)
+- BGM为魔塔一区BGM，走路音效来自 https://sc.chinaz.com/yinxiao/201201513682.htm
 
 
 
