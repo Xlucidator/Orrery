@@ -121,11 +121,9 @@ void World::initObjects() {
 	_camera.followAt(_player);
 
 	/* Create Objects */
-	glm::mat4 model_transform[] = {  // Location		// Scale
-		createModelMatrix(glm::vec3( 2.0f, 0.0f, -8.0f)),
-	};
-	// _object[10+]
-	int random_pos_num = 8;
+	const int obj_begin = 10;
+	const int barrel_num = 4, box_num = 3, barrelpack_num = 1;
+	int random_pos_num = barrel_num + box_num + barrelpack_num;
 	std::vector<glm::vec3> random_positions = generateRandomPoints(random_pos_num, 1.5f, _border, 4.0f);
 	std::cout << "[Randomly Generate Positions]" << std::endl;
 	for (auto& pos : random_positions) {
@@ -133,20 +131,33 @@ void World::initObjects() {
 	}
 
 	// Interactable Barrel
-	int barrel_num = 3;
-	for (int i = 0; i < barrel_num; i++) {
+	int barrel_end = 0 + barrel_num;
+	for (int i = 0; i < barrel_end; i++) {
 		_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, DYNAMIC,
 			random_positions[i], 1.0f, glm::vec3(0.0f, -1.0f, 0.2f)
 		));
 	}
 	
-	// Box
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, box, STATIC,
-		glm::vec3(3.0f, 0.0f, -4.0f), 1.0f
-	));
-	_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, model_transform[0], STATIC));
+	// Grunge Box
+	int box_end = barrel_end + box_num;
+	for (int i = barrel_end; i < box_end; i++) {
+		glm::vec3 position = random_positions[i]; position.y = 0.0f;
+		_objects.emplace_back(std::make_shared<Object>(_global_shader, box, STATIC,
+			position, 1.0f
+		));
+	}
 
-	// Quad Guard
+	// Barrel Packs
+	int barrelpack_end = box_end + barrelpack_num;
+	for (int i = box_end; i < barrelpack_end; i++) {
+		glm::vec3 position = random_positions[i]; position.y = 0.0f;
+		_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, STATIC,
+			position
+		)); 
+		// glm::vec3(2.0f, 0.0f, -8.0f)
+	}
+
+	// Quad Guard: x 4
 	for (uint8_t i = 0; i < 4; i++) {
 		_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, STATIC,
 			glm::vec3(-21.0f + (i & 0b01) * 42.0f, 0.0f, -21.0f + (i >> 1) * 42.0f), 
@@ -165,7 +176,7 @@ void World::initObjects() {
 
 	/* init Objects Physics */
 #ifdef PHYSIC_IMPL
-	// Ground: 
+	// Ground Plane
 	physx::PxRigidStatic* ground_plane = mPhysics->createRigidStatic(physx::PxTransform(0.0f, -0.5f, 0.0f));
 	{
 		physx::PxShape* ground_shape = mPhysics->createShape(physx::PxBoxGeometry(50.0f, 0.5f, 50.0f), *mMaterial);
@@ -180,15 +191,22 @@ void World::initObjects() {
 	mScene->addActor(*player);
 	
 	// Other Objects
-	for (int i = 0; i < barrel_num; i++) {
-		auto barrel_actor = _objects[10 + i]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
+	// Barrel
+	for (int i = 0; i < barrel_end; i++) {
+		auto barrel_actor = _objects[obj_begin + i]->createRigidDynamic(mPhysics, *mCookingParams, mMaterial);
 		barrel_actor->setMass(5.0f);
 		barrel_actor->setCMassLocalPose(physx::PxTransform(0.0f, 0.7f, 0.0f));
 		mScene->addActor(*barrel_actor);
 	}
 
-	//auto box_actor = _objects[11]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
-	//mScene->addActor(*box_actor);
+	for (int i = barrel_end; i < box_end; i++) {
+		auto box_actor = _objects[obj_begin + i]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
+		mScene->addActor(*box_actor);
+	}
+	
+	for (int i = box_end; i < barrelpack_end; i++) {
+
+	}
 
 	for (int i = 10; i < _objects.size(); i++) {/* Other Objects in Batch */}
 #endif
