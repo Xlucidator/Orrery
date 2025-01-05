@@ -118,11 +118,11 @@ void World::initObjects() {
 	/* Create Player */
 	_player = std::make_shared<Player>(_global_shader, avatar, _border); // Must be Dynamic
 	_objects.push_back(_player); // _objects[9]
-	_camera.followAt(_player);
+	_camera.switchMode(_player);
 
 	/* Create Objects */
 	const int obj_begin = 10;
-	const int barrel_num = 4, box_num = 3, barrelpack_num = 1;
+	const int barrel_num = 1, box_num = 3, barrelpack_num = 1;
 	int random_pos_num = barrel_num + box_num + barrelpack_num;
 	std::vector<glm::vec3> random_positions = generateRandomPoints(random_pos_num, 1.5f, _border, 5.0f);
 	std::cout << "[Randomly Generate Positions]" << std::endl;
@@ -174,7 +174,7 @@ void World::initObjects() {
 		auto random_flying_bird = std::make_shared<Object>(_global_shader, hawk, DYNAMIC,
 			glm::vec3(-2.0f, 3.0f, 2.0f), 0.3f, glm::vec3(0.0f, 0.0f, -1.0f)
 		);
-		random_flying_bird->enableRandomMove(3.5f, 4.5f);
+		random_flying_bird->enableRandomMove(3.5f, 4.4f + i * 0.3);
 		_objects.push_back(random_flying_bird);
 	}
 	
@@ -204,10 +204,10 @@ void World::initObjects() {
 		mScene->addActor(*barrel_actor);
 	}
 
-	//for (int i = barrel_end; i < box_end; i++) {
-	//	auto box_actor = _objects[obj_begin + i]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
-	//	mScene->addActor(*box_actor);
-	//}
+	for (int i = barrel_end; i < box_end; i++) {
+		auto box_actor = _objects[obj_begin + i]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
+		mScene->addActor(*box_actor);
+	}
 	
 	//for (int i = box_end; i < barrelpack_end; i++) {
 	//	auto barrelpack_actor = _objects[obj_begin + i]->createRigidStatic(mPhysics, *mCookingParams, mMaterial);
@@ -292,6 +292,8 @@ void World::processKeyboardPress() {
 	if (keyboard[GLFW_KEY_SPACE]) {
 		std::cout << "[Player Position] " << glm::to_string(_player->getPosition()) << std::endl;
 	}
+	// Switch
+	if (keyboard[GLFW_KEY_C]) _camera.switchMode(_player);
 }
 
 // Attension: This function is called successively every window refresh, not keyboard callback
@@ -309,7 +311,7 @@ void World::processKeyboardRelease() {
 }
 
 void World::processMouseMovement(float xoffset, float yoffset) {
-	//_camera.processMouseMovement(xoffset, yoffset, true);
+	_camera.processMouseMovement(xoffset, yoffset, true);
 }
 
 void World::processMouseScroll(float yoffset) {

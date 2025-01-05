@@ -66,6 +66,10 @@ public:
 	/* Special: Decorating */
 	void enableRandomMove(float height, float speed);
 
+	/* Camera Mode */
+	virtual void lock() {}
+	virtual void unlock() {}
+
 protected:
 	std::shared_ptr<Shader> _shader = nullptr; // shared
 	std::shared_ptr<Model> _model = nullptr;   // shared

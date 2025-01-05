@@ -13,17 +13,39 @@ Camera::Camera(glm::vec3 pos, glm::vec3 wup, float yaw, float pitch):
 }
 
 
-void Camera::followAt(std::shared_ptr<Object> obj) {
+void Camera::follow(std::shared_ptr<Object> obj) {
 	assert(obj != nullptr);
 	_status = CAMERA_FOLLOW;
+	obj->unlock();
 	_followed_object = obj;
 	_followed_offset = position - _followed_object->getPosition();
+#ifdef DEBUG
+	std::cout << "Camera: switch to mode FOLLOW" << std::endl;
+#endif 
 }
 
+void Camera::free() {
+	_status = CAMERA_FREE; 
+	_followed_object->lock();
+	_followed_object = nullptr;
+	_followed_offset = glm::vec3(0.0f);
+#ifdef DEBUG
+	std::cout << "Camera: switch to mode FREE" << std::endl;
+#endif 
+}
+
+void Camera::switchMode(std::shared_ptr<Object> obj) {
+	if (_status == CAMERA_FREE) {
+		follow(obj);
+	}
+	else if (_status == CAMERA_FOLLOW) {
+		free();
+	}
+}
 
 /* Camera Movement */
 // TODO: can be clearer, seperate input semantics with movement semantics
-void Camera::processKeyboard(/*Movement direction, */float delta_t) {
+void Camera::processKeyboard(float delta_t) {
 	if (_status == CAMERA_FOLLOW) {
 		assert(obj != nullptr);
 		position = _followed_object->getPosition() + _followed_offset;
@@ -31,20 +53,16 @@ void Camera::processKeyboard(/*Movement direction, */float delta_t) {
 	} 
 
 	float velocity = movement_speed * delta_t;
-
-	glm::vec3 pace = static_cast<float>(keyboard[GLFW_KEY_W]) * pace_vec[GLFW_KEY_W]
-				   + static_cast<float>(keyboard[GLFW_KEY_S]) * pace_vec[GLFW_KEY_S]
-				   + static_cast<float>(keyboard[GLFW_KEY_A]) * pace_vec[GLFW_KEY_A]
-				   + static_cast<float>(keyboard[GLFW_KEY_D]) * pace_vec[GLFW_KEY_D];
-	
-	if (pace != glm::vec3(0.0f, 0.0f, 0.0f)) {
-		pace = glm::normalize(pace);
-		position += pace * velocity;
-	}
+	if (keyboard[GLFW_KEY_W])		position += front * velocity;
+	else if (keyboard[GLFW_KEY_S])	position -= front * velocity;
+	else if (keyboard[GLFW_KEY_A])	position -= right * velocity;
+	else if (keyboard[GLFW_KEY_D])  position += right * velocity;
 }
 
 void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrain_pitch) {
-    xoffset *= mouse_sensitivity;
+	if (_status != CAMERA_FREE) return ;
+	
+	xoffset *= mouse_sensitivity;
     yoffset *= mouse_sensitivity;
 
     yaw   += xoffset;

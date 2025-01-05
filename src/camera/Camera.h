@@ -6,12 +6,12 @@
 
 const float YAW = -90.0f;
 const float PITCH = -50.0f;
-const float SPEED = 4.0f;
+const float SPEED = 6.0f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 45.0f;
 
 enum CameraStatus {
-	CAMERA_FREE,
+	CAMERA_FREE = 0,
 	CAMERA_FOLLOW
 };
 
@@ -35,17 +35,18 @@ public:
 
 	glm::mat4 getViewMatrix() { return glm::lookAt(position, position + front, up); }
 
-	void followAt(std::shared_ptr<Object> obj);
-	void free() { _status = CAMERA_FREE; }
+	void switchMode(std::shared_ptr<Object> obj);
 
-	void processKeyboard(/*Movement direction, */float delta_time);
+	void processKeyboard(float delta_time);
 	void processMouseMovement(float xoffset, float yoffset, GLboolean constrain_pitch = true);
 	void processMouseScroll(float yoffset);
 
 private:
 	CameraStatus _status = CAMERA_FREE;
-	std::shared_ptr<Object> _followed_object;
+	std::shared_ptr<Object> _followed_object = nullptr;
 	glm::vec3 _followed_offset;
+	void follow(std::shared_ptr<Object> obj);
+	void free();
 
 	void update(); // update camera vector
 };

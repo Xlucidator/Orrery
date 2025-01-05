@@ -4,6 +4,8 @@
 #include "utils.h"
 
 void Player::walk() {
+	if (_islocked) return;
+
 	_status = PLAYER_WALK; 
 	if (!walking_sound || walking_sound->isFinished()) {
 		walking_sound = sound_engine->play2D("assets/audios/walking.mp3", true, false, true);
@@ -12,6 +14,8 @@ void Player::walk() {
 }
 
 void Player::idle() { 
+	if (_islocked) return;
+
 	_status = PLAYER_IDLE; 
 	animator->reset(); 
 	if (walking_sound && !walking_sound->isFinished()) {
@@ -20,7 +24,7 @@ void Player::idle() {
 }
 
 void Player::update(float _delta_time) {
-	
+
 	if (_status == PLAYER_WALK) {
 		animator->update(_delta_time);
 	}
@@ -37,6 +41,8 @@ void Player::update(float _delta_time) {
 
 
 void Player::processKeyboard(float delta_time) {
+	if (_islocked) return;
+
 	/* position and rotation */
 	float velocity = _movement_speed * delta_time;
 

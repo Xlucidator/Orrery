@@ -39,10 +39,16 @@ public:
 	physx::PxRigidDynamic* Player::createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material) override;
 	void updateSimulateResult() override;
 
+	/* Camera Mode */
+	void lock() override { idle(); _islocked = true; }
+	void unlock() override { _islocked = false; }
+
 protected:
 	PlayerStatus _status = PLAYER_IDLE;
 	float _movement_speed = 4.0f;
 	float _activity_range = 50.f;
+
+	bool _islocked = false;
 
 	/* Physics */
 	float _aabb_hy = 3.0f;
