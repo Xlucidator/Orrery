@@ -104,8 +104,8 @@ C:/Program Files/CMake/share/cmake-3.31/Modules/Platform/Windows-MSVC-CXX.cmake
 C:/Program Files/CMake/share/cmake-3.31/Modules/Platform/Windows-MSVC.cmake
 C:/Program Files/CMake/share/cmake-3.31/Modules/Platform/Windows.cmake
 C:/Program Files/CMake/share/cmake-3.31/Modules/Platform/WindowsPaths.cmake
-D:/Money/241225/EscapeDungeon/CMakeLists.txt
-D:/Money/241225/EscapeDungeon/sln/CMakeFiles/3.31.3/CMakeCCompiler.cmake
-D:/Money/241225/EscapeDungeon/sln/CMakeFiles/3.31.3/CMakeCXXCompiler.cmake
-D:/Money/241225/EscapeDungeon/sln/CMakeFiles/3.31.3/CMakeRCCompiler.cmake
-D:/Money/241225/EscapeDungeon/sln/CMakeFiles/3.31.3/CMakeSystem.cmake
+$(ProjectDir)../CMakeLists.txt
+$(ProjectDir)../sln/CMakeFiles/3.31.3/CMakeCCompiler.cmake
+$(ProjectDir)../sln/CMakeFiles/3.31.3/CMakeCXXCompiler.cmake
+$(ProjectDir)../sln/CMakeFiles/3.31.3/CMakeRCCompiler.cmake
+$(ProjectDir)../sln/CMakeFiles/3.31.3/CMakeSystem.cmake

@@ -167,7 +167,7 @@ Method 1: Using Visual Studio CMake (Recommend)
 
 Method 2: Using Visual Studio SLN
 
-- The project has prepared a pre-set .sln file in sln/ file to be used
+- The project has prepared a pre-set .sln file in sln/ file to be used：After Open the sln，**REMEMBER TO switch to EscapeDungeon Project after buid and run** 
 
 - If the current .sln in sln/ do not work, you could create your own sln one with the following command
 
