@@ -131,13 +131,11 @@ Penalties：**-5？**
 ```cmd
 mkdir build
 cd build
-cmake -A "x64" -G "Visual Studio 17 2022" ..
+cmake -A "x64" -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release ..
 # Version 17, Visual Studio 2022
 ```
 
 
-
-在新建的build目录中，`` 
 
 导入自定义模型：在World.cpp文件的`World::initObjects()`函数中，该函数首先编译构建指定着色器，随后导入指定路径的模型，随后依据配置使用指定着色器、模型、位置构建Object，最后可选择性生成Object在PhysX中的物理场景中的形态(刚体)以参与物理模拟
 
@@ -150,6 +148,33 @@ cmake -A "x64" -G "Visual Studio 17 2022" ..
 - 键盘输入：WASD控制玩家，FOLLOW模式的相机移动；按下空格会在stdout中输出当前角色所在坐标，可用于调试或测量
 - 鼠标移动：普通情况控制相机欧拉角，当前FOLLOW模式相机不响应
 - 鼠标滚轮：相机视角缩放
+
+
+
+### How to Use
+
+Method 1: Using Visual Studio CMake (Recommend)
+
+- Open Visual Studio with no code, Select "Open" → "CMake" on the menu, letting VS browsing through the project through CMake
+- Switch to Release Mode
+- Save CMakeLists.txt to update CMakeCache, which would copy *.dll and assets in the the exe directory, every time before you 
+
+Method 2: Using Visual Studio SLN
+
+- The project has prepared a pre-set .sln file in sln-prebuild file to be used
+
+- If the current .sln in sln-prebuild do not work, you could create your own sln one with the following command
+
+  ```cmd
+  # at the root dir of the project
+  mkdir build
+  cd build
+  cmake -A "x64" -G "Visual Studio 17 2022" -DCMAKE_BUILD_TYPE=Release .. # which means 'Version 17, Visual Studio 2022'
+  ```
+
+- Then the .sln would be generated in the build/ directory, cd build and open the .sln，remember to run the project under"Release" version
+
+
 
 
 

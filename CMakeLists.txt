@@ -25,16 +25,16 @@ add_executable(EscapeDungeon
 	glad.c
 	${SRC_INNER}
 )
-add_executable(AgedTest
-	main_deprecated.cpp 
-	glad.c
-	${SRC_INNER}
-)
+#add_executable(AgedTest
+#	main_deprecated.cpp 
+#	glad.c
+#	${SRC_INNER}
+#)
 
 # libs
 file(GLOB LIBS "${CMAKE_SOURCE_DIR}/thirdparty/lib/*.lib")
 target_link_libraries(EscapeDungeon ${LIBS})
-target_link_libraries(AgedTest ${LIBS})
+#target_link_libraries(AgedTest ${LIBS})
 
 # assets
 file(GLOB ASSETS "${CMAKE_SOURCE_DIR}/assets")
@@ -43,5 +43,5 @@ file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
 # dlls
 file(GLOB DLLS "${CMAKE_SOURCE_DIR}/thirdparty/dll/*.dll")
 file(COPY ${DLLS} DESTINATION ${CMAKE_BINARY_DIR})
-file(GLOB PDBS "${CMAKE_SOURCE_DIR}/thirdparty/dll/*.pdb")
-file(COPY ${PDBS} DESTINATION ${CMAKE_BINARY_DIR})
+#file(GLOB PDBS "${CMAKE_SOURCE_DIR}/thirdparty/dll/*.pdb")
+#file(COPY ${PDBS} DESTINATION ${CMAKE_BINARY_DIR})
