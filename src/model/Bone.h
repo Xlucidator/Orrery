@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 struct KeyPosition {
 	glm::vec3 position;
@@ -34,16 +35,13 @@ public:
 	int getBoneId() const { return _id; }
 
 	int getPositionIndex(float animation_time) {
-		for (int i = 0; i < _pos_num - 1; i++)
-			if (animation_time < _positions[i + 1].timestamp) return i;
+		return findKeyFrameIndex(_positions, animation_time);
 	}
 	int getRotationIndex(float animation_time) {
-		for (int i = 0; i < _rot_num - 1; i++)
-			if (animation_time < _rotations[i + 1].timestamp) return i;
+		return findKeyFrameIndex(_rotations, animation_time);
 	}
 	int getScaleIndex(float animation_time) {
-		for (int i = 0; i < _scl_num - 1; i++)
-			if (animation_time < _scales[i + 1].timestamp) return i;
+		return findKeyFrameIndex(_scales, animation_time);
 	}
 
 private:
@@ -60,6 +58,24 @@ private:
 	glm::mat4 interpolatePosition(float animation_time);
 	glm::mat4 interpolateRotation(float animation_time);
 	glm::mat4 interpolateScaling(float animation_time);
+
+	/* Find the index i in keyFrames that satisfies:
+	 *  keyFrames[i].timestamp <= animation_time < keyFrames[i+1].timestamp
+	 *  - empty keyFrames: return 0
+	 *  - equals to : 
+	 *		int i;
+	 *      for (i = 0; i < _scl_num - 1; i++)
+	 *		    if (animation_time < _scales[i + 1].timestamp) return i;
+	 *		return i;
+	 */ template<typename T>
+	int findKeyFrameIndex(const std::vector<T>& keyFrames, float time) {
+		if (keyFrames.empty() || time < keyFrames.front().timestamp) return 0;
+
+		auto it = std::upper_bound(keyFrames.begin(), keyFrames.end(), time, [](float t, const T& frame){ 
+			return t < frame.timestamp; 
+		});
+		return it - keyFrames.begin() - 1;
+	}
 };
 
 
