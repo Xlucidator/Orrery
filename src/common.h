@@ -5,18 +5,25 @@
 #include <memory>
 #include <random>
 
+/* API & Window */
 #define GLFW_INCLUDE_NONE
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+/* Model */
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include <PhysX5/PxPhysicsAPI.h>
+/* Physics */
+#ifdef PHYSIC_IMPL
+	#include <PhysX5/PxPhysicsAPI.h>
+#endif
 
+/* Sound */
 #include <irrklang/irrKlang.h>
 
+/* Math */
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

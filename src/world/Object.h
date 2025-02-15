@@ -26,11 +26,13 @@ public:
 		//if (px_triangle_mesh) { px_triangle_mesh->release(); std::cout << "Cleared px_triangle_mesh" << std::endl; }
 	}
 
+	/* General Pipeline Operation */
 	void render(glm::mat4& view, glm::mat4& projection); // TODO: whether render here or out
 	void draw(std::shared_ptr<Shader>& shader);
 	void start();
 	virtual void update(float _delta_time);
 
+	/* Pose Get & Set */
 	void setModelMatrix(glm::mat4 model) { 
 		_model_matrix = model;
 		updateNormModelMatrix();
@@ -40,20 +42,24 @@ public:
 	glm::vec3 getPosition() const { return _position; }
 
 	/* Physics */
-	// PxActor
-	//	©¸©¤©¤ PxRigidActor
-	//		©À©¤©¤ PxRigidStatic
-	//		©¸©¤©¤ PxRigidBody
-	//				©À©¤©¤ PxRigidDynamic
-	//				©¸©¤©¤ PxArticulationLink
+	/* Data structure
+	 * PxActor
+	 *	©¸©¤©¤ PxRigidActor
+	 *		©À©¤©¤ PxRigidStatic
+	 *		©¸©¤©¤ PxRigidBody
+	 *				©À©¤©¤ PxRigidDynamic
+	 *				©¸©¤©¤ PxArticulationLink
+	 */
 	// physx::PxActorType::Enum px_atype = physx::PxActorType::Enum::eINVALID;
 	// physx::PxActor* rigid_actor = nullptr;
 	PXType px_type = NONE;
+#ifdef PHYSIC_IMPL
 	physx::PxRigidStatic* rigid_static = nullptr;
 	physx::PxRigidDynamic* rigid_dynamic = nullptr;
 	physx::PxRigidStatic* createRigidStatic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
 	virtual physx::PxRigidDynamic* createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material);
 	virtual void updateSimulateResult();
+#endif
 
 	/* Animator: Drive Animation */
 	std::shared_ptr<Animator> animator = nullptr;
@@ -84,9 +90,10 @@ protected:
 	float _scale = 1.0f; // TODO: do not use
 	glm::quat _rotation;
 	// For Physics Transform
+#ifdef PHYSIC_IMPL
 	physx::PxTransform _px_transform;
+#endif
 	
-
 	void updateModelMatrixThroughEuler() { // TODO: Not a Good One, Unify to Quat
 		// assume front.y != 1.0f/-1.0f
 		_right = glm::cross(_front, _up); 
@@ -98,8 +105,10 @@ protected:
 	}
 
 	/* Physics */
+#ifdef PHYSIC_IMPL
 	physx::PxTriangleMesh* px_triangle_mesh = nullptr;
 	void cookAndCreateTriangleMesh(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams);
+#endif
 
 	/* Special */
 	bool _random_move = false;

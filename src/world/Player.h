@@ -36,8 +36,10 @@ public:
 	void processMouseScroll(float yoffset) override;
 
 	/* Physics */
+#ifdef PHYSIC_IMPL
 	physx::PxRigidDynamic* createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material) override;
 	void updateSimulateResult() override;
+#endif
 
 	/* Camera Mode */
 	void lock() override { idle(); _islocked = true; }

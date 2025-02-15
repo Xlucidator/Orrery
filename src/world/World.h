@@ -10,7 +10,9 @@
 #include "model/Model.h"
 #include "animation/Animator.h"
 #include "animation/Animation.h"
-#include "physics/CollisionCB.h"
+#ifdef PHYSIC_IMPL
+	#include "physics/CollisionCB.h"
+#endif
 
 #include <vector>
 
@@ -19,6 +21,7 @@ public:
 	World();
 	~World() {
 		// Must in order: Material -> Scene
+	#ifdef PHYSIC_IMPL
 		if (mCookingParams) { delete mCookingParams;	mCookingParams = nullptr;	std::cout << "Cleared mCookingParams" << std::endl; }
 		if (mMaterial)		{ mMaterial->release();		mMaterial = nullptr;		std::cout << "Cleared mMaterial" << std::endl; }
 		if (mScene)			{ mScene->release();		mScene = nullptr;			std::cout << "Cleared mScene" << std::endl; }
@@ -30,6 +33,7 @@ public:
 
 		// Must be the Last One
 		if (mFoundation)	{ mFoundation->release();	mFoundation = nullptr;		std::cout << "Cleared mFoundation" << std::endl; }
+	#endif
 	}
 
 	void init();
@@ -51,7 +55,7 @@ private:
 	/*=== Object ===*/
 	std::shared_ptr<Player> _player = nullptr;
 	std::vector<std::shared_ptr<Object>> _objects;
-	std::shared_ptr<Object> _signature = nullptr;
+	//std::shared_ptr<Object> _signature = nullptr;
 
 	/*=== Camera ===*/
 	Camera _camera;
@@ -73,6 +77,7 @@ private:
 
 	/*=== Physics ===*/
 	// PhysX Variables
+#ifdef PHYSIC_IMPL
 	physx::PxDefaultAllocator		mAllocator;
 	physx::PxDefaultErrorCallback	mErrorCallback;
 	physx::PxFoundation*			mFoundation = nullptr;
@@ -87,19 +92,25 @@ private:
 	//physx::PxPvdSceneClient*		mPvdClient = nullptr;
 	physx::PxMaterial*				mMaterial = nullptr;
 	MyCollisionCallback*			mCollisionCallback = nullptr;
+	void initPhysics();
+#endif
 	
 	/* Utils */
 	bool need_start = true;
 	bool first_start = true;
 
-	void initPhysics();
 	void initObjects();
 };
 
 
+#ifdef PHYSIC_IMPL
+
 physx::PxFilterFlags MyFilterShader(physx::PxFilterObjectAttributes attributes0, physx::PxFilterData filterData0,
 	physx::PxFilterObjectAttributes attributes1, physx::PxFilterData filterData1,
 	physx::PxPairFlags& pairFlags, const void* constantBlock, physx::PxU32 constantBlockSize);
+
+#endif
+
 
 #endif // !WORLD_H
 

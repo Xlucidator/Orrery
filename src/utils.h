@@ -38,6 +38,8 @@ glm::mat4 createModelMatrix(const glm::vec3 & position, const glm::vec3 & scale 
 glm::mat4 createModelMatrix(const glm::vec3 & position, const glm::vec3& front, const glm::vec3& up, const glm::vec3& right, const glm::vec3 & scale);
 glm::mat4 createModelMatrix(const glm::vec3 & position, const glm::quat & rotation, const glm::vec3 & scale = glm::vec3(1.0f));
 
+#ifdef PHYSIC_IMPL
+
 inline void printPxTransform(const physx::PxTransform& transform) {
     printf("Position: x = %f, y = %f, z = %f\n",
         transform.p.x, transform.p.y, transform.p.z);
@@ -45,6 +47,8 @@ inline void printPxTransform(const physx::PxTransform& transform) {
     printf("Rotation (quaternion): x = %f, y = %f, z = %f, w = %f\n",
         transform.q.x, transform.q.y, transform.q.z, transform.q.w);
 }
+
+#endif
 
 extern std::unordered_map<int8_t, glm::vec3> pace_vec;
 

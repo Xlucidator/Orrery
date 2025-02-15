@@ -29,13 +29,15 @@ void Player::update(float _delta_time) {
 		animator->update(_delta_time);
 	}
 
+#ifdef PHYSIC_IMPL
 	physx::PxTransform transform_to_test(
 		physx::PxVec3(_position.x, _position.y, _position.z),
 		physx::PxQuat(_rotation.x, _rotation.y, _rotation.z, _rotation.w)
 	);
 	transform_to_test.p = physx::PxVec3(_position.x, _position.y + _aabb_hy, _position.z); // ignore rotation first
-#ifdef PHYSIC_IMPL
-	rigid_dynamic->setKinematicTarget(transform_to_test);
+	rigid_dynamic->setKinematicTarget(transform_to_test); // set to transform test, get result in updateSimulateResult
+#else
+	updateModelMatrixThroughEuler();
 #endif
 }
 
@@ -69,6 +71,8 @@ void Player::processMouseScroll(float yoffset) {
 
 }
 
+
+#ifdef PHYSIC_IMPL
 
 physx::PxRigidDynamic* Player::createRigidDynamic(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams, physx::PxMaterial* material) {
 	cookAndCreateTriangleMesh(physics, cookingParams);
@@ -108,3 +112,5 @@ void Player::updateSimulateResult() {
 
 	updateModelMatrixThroughEuler();
 }
+
+#endif

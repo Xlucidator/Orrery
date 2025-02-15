@@ -27,8 +27,10 @@ public:
 	int& getBoneCnt() { return _bone_cnt; }
 
 	/* Physics */
+#ifdef PHYSIC_IMPL
 	std::vector<physx::PxVec3> px_combined_vertices;
 	std::vector<physx::PxU32>  px_combined_indices;
+#endif
 
 	/* Animation */
 	bool has_animation = false;
@@ -75,7 +77,9 @@ private:
 	void setVertexBoneData(Vertex& vertex, int boneid, float weight);
 
 	/* Physics */
+#ifdef PHYSIC_IMPL
 	void setPxCombinedMesh();
+#endif
 };
 
 

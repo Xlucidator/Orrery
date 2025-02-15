@@ -65,7 +65,9 @@ void Model::load(std::string& path) {
 	processNode(scene->mRootNode, scene);
 
 	// Prepare data for PhysX
+#ifdef PHYSIC_IMPL
 	setPxCombinedMesh();
+#endif
 
 	// Prepare Animation
 	if (scene->HasAnimations()) {
@@ -180,6 +182,8 @@ void Model::loadMaterialTextureByHand(std::string file_name) {
 
 
 /* Physics */
+#ifdef PHYSIC_IMPL
+
 void Model::setPxCombinedMesh() {
 	size_t vertex_offset = 0;
 	for (const auto& mesh : _meshes) {
@@ -194,6 +198,8 @@ void Model::setPxCombinedMesh() {
 		}
 	}
 }
+
+#endif
 
 
 /* Bone */

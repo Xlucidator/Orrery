@@ -57,10 +57,12 @@ void Object::draw(std::shared_ptr<Shader>& shader) {
 }
 
 void Object::start() {
+#ifdef PHYSIC_IMPL
 	if (px_type == DYNAMIC) {
 		std::cout << "object: enable gravity" << std::endl;
 		rigid_dynamic->setActorFlag(physx::PxActorFlag::eDISABLE_GRAVITY, false);
 	}
+#endif
 }
 
 void Object::update(float _delta_time) {
@@ -87,6 +89,7 @@ void Object::render(glm::mat4& view, glm::mat4& projection) { // DO NOT USE: onl
 
 
 /* Physics */
+#ifdef PHYSIC_IMPL
 
 // private
 void Object::cookAndCreateTriangleMesh(physx::PxPhysics* physics, physx::PxCookingParams& cookingParams) {
@@ -181,6 +184,8 @@ void Object::updateSimulateResult() {
 	_model_matrix = createModelMatrix(_position, _rotation, glm::vec3(_scale));
 	updateNormModelMatrix();
 }
+
+#endif
 
 
 /* Special */ // TODO: Move in to new Derived Class

@@ -85,7 +85,7 @@ void World::render() {
 
 	_global_shader->end();
 
-	_signature->render(_view, _projection);
+	//_signature->render(_view, _projection);
 }
 
 void World::initObjects() {
@@ -97,10 +97,10 @@ void World::initObjects() {
 
 	// Makeshift: to seperate from _global_shader, 
 	//		for mixed sampler2D texture_diffuse2 would be used by other Object if they don't have >1 diffuse_texture
-	auto signature_shader = std::make_shared<Shader>(
-		"assets/shaders/loadobj.vert",
-		"assets/shaders/loadobj_nolight.frag"
-	); 
+	//auto signature_shader = std::make_shared<Shader>(
+	//	"assets/shaders/loadobj.vert",
+	//	"assets/shaders/loadobj_nolight.frag"
+	//); 
 
 	auto ground = std::make_shared<Model>("assets/objects/ground/ground.obj");
 	auto avatar = std::make_shared<Model>("assets/objects/darknight/darknight.fbx");
@@ -111,9 +111,9 @@ void World::initObjects() {
 	auto knight = std::make_shared<Model>("assets/objects/knightguard/KnightGuard-nospear.fbx");
 	auto hawk = std::make_shared<Model>("assets/objects/hawk/SparrowHawk.fbx");
 
-	auto signature = std::make_shared<Model>("assets/objects/signature/signature-tomix.obj");
-	signature->loadMaterialTextureByHand("signature_diffuse2.png"); // Makeshift: for mixed texture
-	signature->printTextureLoaded();
+	//auto signature = std::make_shared<Model>("assets/objects/signature/signature-tomix.obj");
+	//signature->loadMaterialTextureByHand("signature_diffuse2.png"); // Makeshift: for mixed texture
+	//signature->printTextureLoaded();
 
 	/* Debug */
 	// knight->printMesh();
@@ -146,15 +146,22 @@ void World::initObjects() {
 	// Interactable Barrel
 	int barrel_end = 0 + barrel_num;
 	for (int i = 0; i < barrel_end; i++) {
+	#ifdef PHYSIC_IMPL
 		_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, DYNAMIC,
 			random_positions[i], 1.0f, glm::vec3(0.0f, -1.0f, 0.2f)
 		));
+	#else
+		glm::vec3& position = random_positions[i]; position.y = 0.0f;
+		_objects.emplace_back(std::make_shared<Object>(_global_shader, barrel, STATIC,
+			position, 1.0f
+		));
+	#endif
 	}
 	
 	// Grunge Box
 	int box_end = barrel_end + box_num;
 	for (int i = barrel_end; i < box_end; i++) {
-		glm::vec3 position = random_positions[i]; position.y = 0.0f;
+		glm::vec3& position = random_positions[i]; position.y = 0.0f;
 		_objects.emplace_back(std::make_shared<Object>(_global_shader, box, STATIC,
 			position, 1.0f
 		));
@@ -163,7 +170,7 @@ void World::initObjects() {
 	// Barrel Packs
 	int barrelpack_end = box_end + barrelpack_num;
 	for (int i = box_end; i < barrelpack_end; i++) {
-		glm::vec3 position = random_positions[i]; position.y = 0.0f;
+		glm::vec3& position = random_positions[i]; position.y = 0.0f;
 		_objects.emplace_back(std::make_shared<Object>(_global_shader, barrels, STATIC,
 			position
 		)); 
@@ -177,16 +184,16 @@ void World::initObjects() {
 			glm::vec3(-1.0f + (i & 0b01) * 2.0f, 0.0f, -1.0f + (i >> 1) * 2.0f)
 		));
 	}
-	glm::vec3 tmp_positon = random_positions[barrelpack_end]; tmp_positon.y = 0.0f;
+	glm::vec3& tmp_positon = random_positions[barrelpack_end]; tmp_positon.y = 0.0f;
 	_objects.emplace_back(std::make_shared<Object>(_global_shader, knight, STATIC,
 		tmp_positon, 0.8f, glm::vec3(0.0f, 0.0f, -1.0f)
 	)); // Random Guard
 
 
 	// Signature
-	_signature = std::make_shared<Object>(signature_shader, signature, STATIC,
-		glm::vec3(0.0f, 10.0f, -50.0f), 5.0f, glm::vec3(0.0f, 0.0f, -1.0f)
-	);
+	//_signature = std::make_shared<Object>(signature_shader, signature, STATIC,
+	//	glm::vec3(0.0f, 10.0f, -50.0f), 5.0f, glm::vec3(0.0f, 0.0f, -1.0f)
+	//);
 
 	// Flying bird
 	for (int i = 0; i < 2; i++) {
@@ -235,6 +242,8 @@ void World::initObjects() {
 	//for (int i = 10; i < _objects.size(); i++) {/* Other Objects in Batch */}
 #endif
 }
+
+#ifdef PHYSIC_IMPL
 
 void World::initPhysics() {
 	std::cout << "Init PhysX" << std::endl;
@@ -299,6 +308,7 @@ physx::PxFilterFlags MyFilterShader(physx::PxFilterObjectAttributes attributes0,
 	return physx::PxFilterFlag::eDEFAULT;
 }
 
+#endif
 
 /*=== Interact ===*/
 void World::processKeyboardPress() {

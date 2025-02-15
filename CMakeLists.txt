@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 3.17)
 project(Orrery)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-# pre-define
-add_definitions(-DDEBUG -DPHYSIC_IMPL)
+
+# options
+option(ENABLE_PHYSICS "Enable physics module" ON)
 
 # function define
 function(smart_copy category pattern flattened)
@@ -62,6 +63,7 @@ function(smart_copy category pattern flattened)
     endif()
 endfunction()
 
+
 # include & link
 include_directories(
 	SYSTEM "${CMAKE_SOURCE_DIR}/thirdparty/include"
@@ -70,6 +72,7 @@ include_directories(
 link_directories(
 	SYSTEM "${CMAKE_SOURCE_DIR}/thirdparty/lib"
 )
+
 
 # execute file
 file(GLOB_RECURSE SRC_INNER ${CMAKE_SOURCE_DIR}/src/*.cpp)
@@ -81,18 +84,34 @@ add_executable(Orrery
 	${SRC_INNER}
 )
 
+
+# pre-define
+target_compile_definitions(Orrery PRIVATE DEBUG) # target_compile_definitions(Orrery PRIVATE $<$<CONFIG:Debug>:DEBUG>)
+if(ENABLE_PHYSICS)
+    target_compile_definitions(Orrery PRIVATE PHYSIC_IMPL)
+endif()
+
+
 # libs link
-file(GLOB LIBS "${CMAKE_SOURCE_DIR}/thirdparty/lib/*.lib")
+file(GLOB ALL_LIBS "${CMAKE_SOURCE_DIR}/thirdparty/lib/*.lib")
+
+set(PHYSX_LIBS "") # glob PhysX libs
+foreach(lib ${ALL_LIBS})
+    if (lib MATCHES ".*[Pp]hys[Xx].*\\.lib$" OR lib MATCHES ".*PVDRuntime.*\\.lib$")
+        list(APPEND PHYSX_LIBS ${lib})
+    endif()
+endforeach()
+
+set(LIBS ${ALL_LIBS}) # set used libs
+if (NOT ENABLE_PHYSICS)
+    foreach(physx_lib ${PHYSX_LIBS})
+        list(REMOVE_ITEM LIBS ${physx_lib})
+    endforeach()
+endif()
 target_link_libraries(Orrery ${LIBS})
+message(STATUS "link libraries: ${LIBS}")
+
 
 # assets & dlls copy
 smart_copy("assets" "*" OFF)
 smart_copy("thirdparty/dll" "*.dll" ON)
-
-# deprecated
-#file(GLOB ASSETS "${CMAKE_SOURCE_DIR}/assets")
-#file(COPY ${ASSETS} DESTINATION ${CMAKE_BINARY_DIR})
-#file(GLOB DLLS "${CMAKE_SOURCE_DIR}/thirdparty/dll/*.dll")
-#file(COPY ${DLLS} DESTINATION ${CMAKE_BINARY_DIR})
-#file(GLOB PDBS "${CMAKE_SOURCE_DIR}/thirdparty/dll/*.pdb")
-#file(COPY ${PDBS} DESTINATION ${CMAKE_BINARY_DIR})
