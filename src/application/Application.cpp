@@ -30,7 +30,7 @@ bool Application::init(const int& w = 800, const int& h = 600) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // use core mode
 
 	/* Create window */
-	_window = glfwCreateWindow(_width, _height, "EscapeDungeon", nullptr, nullptr);
+	_window = glfwCreateWindow(_width, _height, "Orrery", nullptr, nullptr);
 	if (_window == nullptr) {
 		perror("Create window");
 		return false;
