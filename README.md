@@ -1,4 +1,4 @@
-# Escape Dungeon
+# Orrery
 
 基于可编程管线OpenGL API实现的简单游戏交互界面，实现功能如下：
 

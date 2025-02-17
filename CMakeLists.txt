@@ -1,34 +1,62 @@
 cmake_minimum_required(VERSION 3.17)
 project(Orrery)
 
+
+# general setting
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+set(THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty")
+set(THIRDPARTY_LIST assimp3 glad glfw glm irrklang stb)
+
+set(PLATFORM_DIR "Windows/MSVC")
+set(LIB_SUFFIX ".lib")
+set(BIN_SUFFIX ".dll")
 
 
 # options
 option(ENABLE_PHYSICS "Enable physics module" ON)
 
+
+# os & platform concerned
+if(WIN32)
+    message(STATUS "Building on Windows")
+
+    if(MSVC)
+        set(PLATFORM_DIR "Windows/MSVC")
+        set(LIB_SUFFIX ".lib")
+        set(BIN_SUFFIX ".dll")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif()
+    if(MINGW)
+        set(PLATFORM_DIR "Windows/MinGW")
+        set(LIB_SUFFIX ".a")
+        set(BIN_SUFFIX ".dll")
+    endif()
+elseif(UNIX)
+    message(STATUS "Building on Unix/Linux")
+
+    set(PLATFORM_DIR "Linux")
+    set(LIB_SUFFIX ".a")
+    set(BIN_SUFFIX ".so*")
+endif()
+
+
 # function define
-function(smart_copy category pattern flattened)
-    message(STATUS "[smart_copy] Scan \"${pattern}\" files from \"${CMAKE_SOURCE_DIR}/${category}\"... flattened: ${flattened} ")
-
-    file(GLOB_RECURSE files 
-        LIST_DIRECTORIES false
-        "${CMAKE_SOURCE_DIR}/${category}/${pattern}"
-    )
-
+## smart copy files in file_list from ${CMAKE_SOURCE_DIR} to {CMAKE_BIN_DIR}
+function(smart_copy_files file_list flattened)
     set(copy_src_list "")
     set(copy_dst_list "")
-    foreach(src_file IN LISTS files)
-        # prepare paths: dst_path & dst_dir
-        if (flattened)
+    foreach(src_file IN LISTS file_list)
+        # prepare paths
+        if (flattened)  # file -> ${CMAKE_BINARY_DIR}/file
             get_filename_component(rel_path "${src_file}" NAME)
-        else()
+        else()          # ${CMAKE_SOURCE_DIR}/rel_path -> ${CMAKE_BIN_DIR}/rel_path
             file(RELATIVE_PATH rel_path "${CMAKE_SOURCE_DIR}" "${src_file}")
+            #message(STATUS "    rel_path = ${rel_path}")
         endif()
-        set(dst_path "${CMAKE_BINARY_DIR}/${rel_path}") 
-        get_filename_component(dst_dir "${dst_path}" DIRECTORY) # dst_path = dst_dir/{file_name}
-        file(MAKE_DIRECTORY "${dst_dir}") # ensure directory exists
+        set(dst_path "${CMAKE_BINARY_DIR}/${rel_path}")         # dst_path
+        get_filename_component(dst_dir "${dst_path}" DIRECTORY) # dst_dir
+        file(MAKE_DIRECTORY "${dst_dir}") # ensure dst_dir exists
 
         # check if file needs copy
         set(need_copy FALSE)
@@ -63,55 +91,64 @@ function(smart_copy category pattern flattened)
     endif()
 endfunction()
 
+## smart copy ${CMAKE_SOURCE_DIR}/${targetdir} to ${CMAKE_BINARY_DIR} with struct
+function(smart_copy_dir tar_dir)
+    message(STATUS "[smart_copy] copy directory \"${CMAKE_SOURCE_DIR}/${tar_dir}\", keep inner struct.")
+    file(GLOB_RECURSE file_list LIST_DIRECTORIES false "${CMAKE_SOURCE_DIR}/${tar_dir}/*")
+    smart_copy_files("${file_list}" OFF)
+endfunction()
 
-# include & link
-include_directories(
-	SYSTEM "${CMAKE_SOURCE_DIR}/thirdparty/include"
-	"${CMAKE_SOURCE_DIR}/src"
-)
-link_directories(
-	SYSTEM "${CMAKE_SOURCE_DIR}/thirdparty/lib"
-)
-
+## smart copy file in file_lists to ${CMAKE_BINARY_DIR}, without struct
+function(smart_copy file_list)
+    message(STATUS "[smart_copy] copy files from \"${file_list}\", without struct.")
+    smart_copy_files("${file_list}" ON)
+endfunction()
 
 # execute file
 file(GLOB_RECURSE SRC_INNER ${CMAKE_SOURCE_DIR}/src/*.cpp)
 message(STATUS "Source files: ${SRC_INNER}")
-
 add_executable(Orrery 
 	main.cpp 
-	src/glad.c
+	${THIRDPARTY_DIR}/glad/glad.c
 	${SRC_INNER}
 )
 
 
-# pre-define
+# option set & predefine
 target_compile_definitions(Orrery PRIVATE DEBUG) # target_compile_definitions(Orrery PRIVATE $<$<CONFIG:Debug>:DEBUG>)
 if(ENABLE_PHYSICS)
     target_compile_definitions(Orrery PRIVATE PHYSIC_IMPL)
+    list(APPEND THIRDPARTY_LIST physx)
 endif()
 
 
-# libs link
-file(GLOB ALL_LIBS "${CMAKE_SOURCE_DIR}/thirdparty/lib/*.lib")
+# include & link & binary
+set(LINK_LIBS "")
+set(USED_BINS "")
+target_include_directories(Orrery SYSTEM PRIVATE "${CMAKE_SOURCE_DIR}/src")
+foreach(category IN LISTS THIRDPARTY_LIST)
+    target_include_directories(Orrery SYSTEM PRIVATE "${THIRDPARTY_DIR}/${category}/include")
 
-set(PHYSX_LIBS "") # glob PhysX libs
-foreach(lib ${ALL_LIBS})
-    if (lib MATCHES ".*[Pp]hys[Xx].*\\.lib$" OR lib MATCHES ".*PVDRuntime.*\\.lib$")
-        list(APPEND PHYSX_LIBS ${lib})
+    set(LIB_DIR "${THIRDPARTY_DIR}/${category}/lib/${PLATFORM_DIR}")
+    if(EXISTS ${LIB_DIR})
+        target_link_directories(Orrery PRIVATE "${LIB_DIR}")
+        file(GLOB libfiles "${LIB_DIR}/*${LIB_SUFFIX}")
+        list(APPEND LINK_LIBS ${libfiles})
+    endif()
+
+    set(BIN_DIR "${THIRDPARTY_DIR}/${category}/bin/${PLATFORM_DIR}")
+    if(EXISTS ${BIN_DIR})
+        file(GLOB binfiles "${BIN_DIR}/*${BIN_SUFFIX}")
+        list(APPEND USED_BINS ${binfiles})
     endif()
 endforeach()
-
-set(LIBS ${ALL_LIBS}) # set used libs
-if (NOT ENABLE_PHYSICS)
-    foreach(physx_lib ${PHYSX_LIBS})
-        list(REMOVE_ITEM LIBS ${physx_lib})
-    endforeach()
-endif()
-target_link_libraries(Orrery ${LIBS})
-message(STATUS "link libraries: ${LIBS}")
-
+target_link_libraries(Orrery ${LINK_LIBS})
+message(STATUS "link libraries: ${LINK_LIBS}")
+message(STATUS "used binaries : ${USED_BINS}")
 
 # assets & dlls copy
-smart_copy("assets" "*" OFF)
-smart_copy("thirdparty/dll" "*.dll" ON)
+smart_copy_dir("assets")
+smart_copy("${USED_BINS}")
+
+#smart_copy("assets" "*" OFF)
+#smart_copy("thirdparty/bin/Windows" "*.dll" ON)
